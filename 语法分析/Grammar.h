@@ -21,6 +21,8 @@ using RHS = std::vector<Symbol>;    // 右部产生式 (right hand side) 类型
 using vectorRHS = std::vector<RHS>; // 右部产生式的集合
 using Productions = std::unordered_map<Symbol, vectorRHS>; // 产生式集合类型
 using UpdateMap = std::unordered_map<Symbol, SymbolSet>;
+using SymbolToRHS = std::unordered_map<Symbol, RHS>;
+using SymbolTable = std::unordered_map<Symbol, std::unordered_map<Symbol, RHS>>; // 行列表头为 Symbol 的二维表（预测分析表类型）
 
 
 class Grammar
@@ -36,10 +38,11 @@ private:
 
     std::unordered_map<Symbol, SymbolSet> first; // first 集合
     std::unordered_map<Symbol, SymbolSet> follow; // follow 集合
-
+    SymbolTable anaTable;
 
     static const int ERR_MISSING_R_BRACKET = 1; // 错误状态代码
     static const int ERR_MISSING_OBJECT = 2;    // 错误状态代码
+    const RHS ERR = { "ERR" };
 
 
     void inputS();

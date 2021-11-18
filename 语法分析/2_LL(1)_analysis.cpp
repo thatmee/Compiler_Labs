@@ -136,7 +136,35 @@ void Grammar::recurUpdFollow(Symbol a, UpdateMap& update) {
 
 /// @brief 构造预测分析表
 void Grammar::buildLL1AnaTable() {
-
+    // 遍历所有产生式
+    for (SymbolSet::iterator iterLeft = N.begin(); iterLeft != N.end(); iterLeft++) {
+        vectorRHS rhss = P[(*iterLeft)];
+        // 遍历一个非终结符的所有右部产生式
+        for (vectorRHS::iterator iterRhs = rhss.begin(); iterRhs != rhss.end(); iterRhs++) {
+            RHS oneRHS = *iterRhs;
+            SymbolSet tmpFirstSet;
+            firstOfVecSymbol(oneRHS, tmpFirstSet);
+            // 对每个终结符号 a∈FIRST(右部)，A->α 放入 M[A,a]
+            for (SymbolSet::iterator a = tmpFirstSet.begin(); a != tmpFirstSet.end(); a++) {
+                if ((*a) != "~")
+                    anaTable[*iterLeft][*a] = oneRHS;
+                else {
+                    for (SymbolSet::iterator b = follow[*iterLeft].begin(); b != follow[*iterLeft].end(); b++)
+                        anaTable[*iterLeft][*b] = oneRHS;
+                }
+            }
+        }
+    }
+    // 给所有无定义的 M[A,a] 标上错误标识
+    SymbolSet rowSet = T;
+    rowSet.erase("~");
+    rowSet.insert("$");
+    for (SymbolSet::iterator line = N.begin(); line != N.end(); line++) {
+        for (SymbolSet::iterator row = rowSet.begin(); row != rowSet.end(); row++) {
+            if (anaTable[*line].find(*row) == anaTable[*line].end())
+                anaTable[*line].insert(std::pair<Symbol, RHS>(*row, { "ERR" }));
+        }
+    }
 }
 
 /// @brief 消除直接左递归
