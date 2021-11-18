@@ -20,6 +20,8 @@ using SymbolSet = std::set<Symbol>; // 符号集合类型
 using RHS = std::vector<Symbol>;    // 右部产生式 (right hand side) 类型
 using vectorRHS = std::vector<RHS>; // 右部产生式的集合
 using Productions = std::unordered_map<Symbol, vectorRHS>; // 产生式集合类型
+using UpdateMap = std::unordered_map<Symbol, SymbolSet>;
+
 
 class Grammar
 {
@@ -55,6 +57,7 @@ private:
     void firstOfOneSymbol(Symbol, SymbolSet&);
     void firstOfVecSymbol(std::vector<Symbol>, SymbolSet&);
     void buildFollow();
+    void recurUpdFollow(Symbol, UpdateMap&);
     void buildLL1AnaTable(); // 构造预测分析表
 
 
