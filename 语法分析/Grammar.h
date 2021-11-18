@@ -52,7 +52,8 @@ private:
     int extractFactor();      // 提取左公因子
     void rewriteGrammar();    // 改写文法
     void buildFirst();
-    void findFirst(Symbol, SymbolSet&);
+    void firstOfOneSymbol(Symbol, SymbolSet&);
+    void firstOfVecSymbol(std::vector<Symbol>, SymbolSet&);
     void buildFollow();
     void buildLL1AnaTable(); // 构造预测分析表
 

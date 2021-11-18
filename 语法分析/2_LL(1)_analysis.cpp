@@ -26,31 +26,45 @@ void Grammar::buildFirst() {
         for (int j = 0; j < rhss.size(); j++) {
             RHS oneRHS = rhss[j];
             SymbolSet firstOfOneRHS;
-            for (int k = 0; k < oneRHS.size(); k++) {
-                SymbolSet tmpFirstSet;
-                // 从产生式的第一个符号开始找 first 集
-                findFirst(oneRHS[k], tmpFirstSet);
-                firstOfOneRHS.insert(tmpFirstSet.begin(), tmpFirstSet.end());
-                // 如果针对当前符号找到的 first 集里没有 ~，则结束寻找 
-                if (tmpFirstSet.find("~") == tmpFirstSet.end())
-                    break;
-            }
+            // 找到当前右部产生式的 first 集合，保存在 firstOfOneRHS 中
+            firstOfVecSymbol(oneRHS, firstOfOneRHS);
+            // 将当前右部产生式的 first 集合加入到对应左部的 first 集合中
             first[*iter].insert(firstOfOneRHS.begin(), firstOfOneRHS.end());
         }
     }
 }
 
+/// @brief 找一连串符号的 first 集合
+/// @param std::vector<Symbol> vecSymbol 输入的一连串符号
+/// @param SymbolSet& firstSet 结果保存的集合 
+void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet& firstSet) {
+    // 遍历符号串的所有符号
+    for (int k = 0; k < vecSymbol.size(); k++) {
+        SymbolSet tmpFirstSet;
+        // 从符号串的第一个符号开始找 first 集
+        firstOfOneSymbol(vecSymbol[k], tmpFirstSet);
+        firstSet.insert(tmpFirstSet.begin(), tmpFirstSet.end());
+        // 如果针对当前符号找到的 first 集里没有 ~，则结束寻找
+        if (tmpFirstSet.find("~") == tmpFirstSet.end())
+            break;
+    }
+}
+
 /// @brief 找某一个符号的 first 集合
-void Grammar::findFirst(Symbol a, SymbolSet& firstSet) {
+/// @param a 需要分析 first 集合的符号
+/// @param firstSet 结果保存的集合
+void Grammar::firstOfOneSymbol(Symbol a, SymbolSet& firstSet) {
+    // 要分析的符号是终结符，则其 first 集合是它本身
     if (T.find(a) != T.end()) {
         firstSet.insert(a);
         return;
     }
+    // 要分析的符号是非终结符，递归查找 first 集合
     else {
         vectorRHS rhss = P[a];
         for (int i = 0; i < rhss.size(); i++) {
             RHS oneRHS = rhss[i];
-            findFirst(oneRHS[0], firstSet);
+            firstOfVecSymbol(oneRHS, firstSet);
         }
     }
 }
