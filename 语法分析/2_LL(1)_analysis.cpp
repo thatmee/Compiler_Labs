@@ -32,16 +32,16 @@ void Grammar::LL1Analysis() {
                 error(0);
         }
         else {
-            if (anaTable[X][ch] == ERR)
+            if (LL1AnaTable[X][ch] == ERR)
                 error(0);
             else {
                 symbolStack.pop_back();
                 // 将右部产生式逆序压入栈，空则不入栈
-                for (RHS::reverse_iterator symbol = anaTable[X][ch].rbegin(); symbol != anaTable[X][ch].rend() && *symbol != "~"; symbol++)
+                for (RHS::reverse_iterator symbol = LL1AnaTable[X][ch].rbegin(); symbol != LL1AnaTable[X][ch].rend() && *symbol != "~"; symbol++)
                     symbolStack.push_back(*symbol);
                 // 输出产生式
                 std::cout << X << "->";
-                for (RHS::iterator symbol = anaTable[X][ch].begin(); symbol != anaTable[X][ch].end(); symbol++)
+                for (RHS::iterator symbol = LL1AnaTable[X][ch].begin(); symbol != LL1AnaTable[X][ch].end(); symbol++)
                     std::cout << *symbol;
                 std::cout << std::endl;
             }
@@ -54,7 +54,7 @@ void Grammar::LL1Analysis() {
 void Grammar::buildFirst() {
     // 遍历所有的非终结符
     for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++) {
-        vectorRHS rhss = P[(*iter)];
+        VectorRHS rhss = P[(*iter)];
         // 遍历一个非终结符的所有右部产生式
         for (int j = 0; j < rhss.size(); j++) {
             RHS oneRHS = rhss[j];
@@ -94,7 +94,7 @@ void Grammar::firstOfOneSymbol(Symbol a, SymbolSet& firstSet) {
     }
     // 要分析的符号是非终结符，递归查找 first 集合
     else {
-        vectorRHS rhss = P[a];
+        VectorRHS rhss = P[a];
         for (int i = 0; i < rhss.size(); i++) {
             RHS oneRHS = rhss[i];
             firstOfVecSymbol(oneRHS, firstSet);
@@ -110,9 +110,9 @@ void Grammar::buildFollow() {
     // 1. 解决与 first 集合相关的所有 follow 集合更新
     // 2. 将所有 follow 集之间的相互更新式保存下来
     for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++) {
-        vectorRHS rhss = P[(*iter)];
+        VectorRHS rhss = P[(*iter)];
         // 遍历一个非终结符的所有右部产生式
-        for (vectorRHS::iterator iterJ = rhss.begin(); iterJ != rhss.end(); iterJ++) {
+        for (VectorRHS::iterator iterJ = rhss.begin(); iterJ != rhss.end(); iterJ++) {
             RHS oneRHS = *iterJ;
             // 遍历一个右部产生式的所有符号
             for (RHS::iterator iterK = oneRHS.begin(); iterK != oneRHS.end(); iterK++) {
@@ -170,19 +170,19 @@ void Grammar::recurUpdFollow(Symbol a, UpdateMap& update) {
 void Grammar::buildLL1AnaTable() {
     // 遍历所有产生式
     for (SymbolSet::iterator iterLeft = N.begin(); iterLeft != N.end(); iterLeft++) {
-        vectorRHS rhss = P[(*iterLeft)];
+        VectorRHS rhss = P[(*iterLeft)];
         // 遍历一个非终结符的所有右部产生式
-        for (vectorRHS::iterator iterRhs = rhss.begin(); iterRhs != rhss.end(); iterRhs++) {
+        for (VectorRHS::iterator iterRhs = rhss.begin(); iterRhs != rhss.end(); iterRhs++) {
             RHS oneRHS = *iterRhs;
             SymbolSet tmpFirstSet;
             firstOfVecSymbol(oneRHS, tmpFirstSet);
             // 对每个终结符号 a∈FIRST(右部)，A->α 放入 M[A,a]
             for (SymbolSet::iterator a = tmpFirstSet.begin(); a != tmpFirstSet.end(); a++) {
                 if ((*a) != "~")
-                    anaTable[*iterLeft][*a] = oneRHS;
+                    LL1AnaTable[*iterLeft][*a] = oneRHS;
                 else {
                     for (SymbolSet::iterator b = follow[*iterLeft].begin(); b != follow[*iterLeft].end(); b++)
-                        anaTable[*iterLeft][*b] = oneRHS;
+                        LL1AnaTable[*iterLeft][*b] = oneRHS;
                 }
             }
         }
@@ -193,8 +193,8 @@ void Grammar::buildLL1AnaTable() {
     rowSet.insert("$");
     for (SymbolSet::iterator line = N.begin(); line != N.end(); line++) {
         for (SymbolSet::iterator row = rowSet.begin(); row != rowSet.end(); row++) {
-            if (anaTable[*line].find(*row) == anaTable[*line].end())
-                anaTable[*line].insert(std::pair<Symbol, RHS>(*row, { "ERR" }));
+            if (LL1AnaTable[*line].find(*row) == LL1AnaTable[*line].end())
+                LL1AnaTable[*line].insert(std::pair<Symbol, RHS>(*row, { "ERR" }));
         }
     }
 }

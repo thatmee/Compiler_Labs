@@ -35,8 +35,8 @@ int main(void)
         break;
     case 3:
         splitLine();
-        //g.input();
-        //g.LR1Analysis();
+        g.input();
+        g.LR1Analysis();
         break;
     default:
         break;

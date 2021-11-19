@@ -33,7 +33,7 @@ Grammar::Grammar() {
 void Grammar::output() const {
     for (auto iter1 = this->P.begin(); iter1 != this->P.end(); iter1++) {
         std::cout << iter1->first << "->"; // 输出每一条产生式的左部和推导符号，如：E->
-        vectorRHS tmp = iter1->second;
+        VectorRHS tmp = iter1->second;
         int len = static_cast<int>(tmp.size()), j = 0;
         for (j = 0; j < len - 1; j++) { // 输出每一条产生式的所有右部产生式，如：E+T|E-T|T
             for (int k = 0; k < tmp[j].size(); k++) { // 输出一个右部产生式，如：E+T
@@ -117,7 +117,7 @@ void Grammar::input() {
 
         // 剩下的部分为所有右部产生式
         std::string rightStr = inputLine.substr(i + 1); // i 是 > 符号，从 i+1 截取右部产生式字符串
-        vectorRHS allRHS;
+        VectorRHS allRHS;
 
         //将所有右部产生式按照 | 进行分成单独的产生式字符串
         std::vector<std::string> allStrRHS;
@@ -141,7 +141,7 @@ void Grammar::input() {
         // 这一行的左部如果已经存在，那么把右部合并进去，如果不存在则创建新的键值对
         Productions::iterator iter = this->P.find(begin);
         if (iter == P.end()) // 没有找到
-            this->P.insert(iter, std::pair<Symbol, vectorRHS>(begin, allRHS));
+            this->P.insert(iter, std::pair<Symbol, VectorRHS>(begin, allRHS));
         else // 找到了
             iter->second.insert(iter->second.end(), allRHS.begin(), allRHS.end());
         std::getline(cin, inputLine);
