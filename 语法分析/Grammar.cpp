@@ -60,7 +60,7 @@ void Grammar::input() {
 
     // 读入非终结符集合
     std::cout << "请输入非终结符集合，以空格分隔：";
-    getchar();
+    char ch = getchar();
     std::getline(cin, inputLine);
     std::vector<Symbol> symbolVec;
     boost::split(symbolVec, inputLine, boost::is_any_of(" "));
@@ -73,7 +73,7 @@ void Grammar::input() {
 
     // 读入终结符集合
     std::cout << "请输入终结符集合，以空格分隔：";
-    getchar();
+    ch = getchar();
     std::getline(cin, inputLine);
     symbolVec.clear();
     boost::split(symbolVec, inputLine, boost::is_any_of(" "));
@@ -81,10 +81,10 @@ void Grammar::input() {
 
     // 读入文法
     std::cout << "请输入文法，要求如下：" << std::endl;
-    std::cout << "1. 不只 1 个字符的终结符/非终结符请使用 @ 括起，如 F->@num@" << std::endl;
+    std::cout << "1. 符号之间以空格分隔，如 F -> num | （ E ）" << std::endl;
     std::cout << "2. 请输入没有二义性、不含【间接】左递归的文法" << std::endl;
     std::cout << "3. 在新行中敲入 # 来结束文法输入" << std::endl;
-    std::cin >> inputLine;
+    std::getline(cin, inputLine);
 
     // 逐行读入，进行处理
     while (inputLine != "#") {
@@ -94,7 +94,7 @@ void Grammar::input() {
         // 分离出一行输入的左部符号
         for (i = 0; i < len - 1; i++)
         {
-            if (inputLine[i] == '-' && inputLine[i + 1] == '>')
+            if (inputLine[i] == ' ')
                 break;
             begin += inputLine[i];
         }
@@ -108,33 +108,32 @@ void Grammar::input() {
             continue;*/
         }
 
+        // 跳过箭头
+        for (; i < len - 1; i++)
+        {
+            if (inputLine[i] == '>')
+                break;
+        }
+
         // 剩下的部分为所有右部产生式
-        std::string rightStr = inputLine.substr(i + 2); // i 和 i+1 是 -> 符号，从 i+2 截取右部产生式字符串
+        std::string rightStr = inputLine.substr(i + 1); // i 是 > 符号，从 i+1 截取右部产生式字符串
         vectorRHS allRHS;
 
         //将所有右部产生式按照 | 进行分成单独的产生式字符串
         std::vector<std::string> allStrRHS;
         boost::split(allStrRHS, rightStr, boost::is_any_of("|"));
 
-        // 将单独的产生式字符串分割出终结符、非终结符，存入 allRHS
+        // 每一个产生式字符串按照空格分隔出终结符、非终结符，存入 allRHS
         for (int j = 0; j < allStrRHS.size(); j++) {
             RHS oneRHS;
             std::string oneStrRHS = allStrRHS[j];
-            std::string tmpSymbol = "";
-            for (int k = 0; k < oneStrRHS.length(); k++) {
-                if (oneStrRHS[k] == '@') { // 如果碰到 @ 符号，从这个 @ 到下一个 @，提取出完整的一个非终结符/终结符
-                    k++;
-                    while (oneStrRHS[k] != '@') {
-                        tmpSymbol += oneStrRHS[k];
-                        k++;
-                    }
-                }
+            boost::split(oneRHS, oneStrRHS, boost::is_any_of(" "));
+            // 清除 split 函数可能产生的空串
+            for (RHS::iterator i = oneRHS.begin(); i != oneRHS.end();) {
+                if (*i == "")
+                    i = oneRHS.erase(i);
                 else
-                    tmpSymbol = std::string(1, oneStrRHS[k]); // 不是 @ 符号，则单个字符成为非终结符/终结符
-                if (tmpSymbol.length() > 0) {// 防止出现 @@ 输入产生的空符号
-                    oneRHS.push_back(tmpSymbol);
-                    tmpSymbol = "";
-                }
+                    i++;
             }
             allRHS.push_back(oneRHS);
         }
@@ -145,26 +144,22 @@ void Grammar::input() {
             this->P.insert(iter, std::pair<Symbol, vectorRHS>(begin, allRHS));
         else // 找到了
             iter->second.insert(iter->second.end(), allRHS.begin(), allRHS.end());
-        std::cin >> inputLine;
+        std::getline(cin, inputLine);
     }
 }
 
 /// @brief 读取要分析的字符串
 void Grammar::inputS() {
     std::string str;
-    std::cin >> str;
+    std::getline(cin, str);
     int i = 0, len = static_cast<int>(str.size());
-    Symbol tmpSymbol = "";
-    for (i = 0; i < len; i++) { //逐字符遍历
-        tmpSymbol = "";
-        if (str[i] == '$') { // 如果碰到 $ 符号，从这个 $ 到下一个 $，提取出完整的一个非终结符/终结符
-            i++;
-            while (str[i] != '$')
-                tmpSymbol += str[i];
-        }
+    boost::split(s, str, boost::is_any_of(" "));
+    // 清除 split 函数可能产生的空串
+    for (RHS::iterator i = s.begin(); i != s.end();) {
+        if (*i == "")
+            i = s.erase(i);
         else
-            tmpSymbol = std::string(1, str[i]); // 不是 $ 符号，则单个字符成为非终结符/终结符
-        if (tmpSymbol.length() > 0) // 防止出现 $$ 输入产生的空符号
-            this->s.push_back(tmpSymbol);
+            i++;
     }
+    this->s.push_back("$");
 }

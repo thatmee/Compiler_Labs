@@ -8,14 +8,46 @@ void Grammar::LL1Analysis() {
     buildFirst();
     buildFollow();
     buildLL1AnaTable();
-
-
-
+    // outputFirst();
+    // outputFollow();
+    // outputAnaTable();
 
     std::cout << "----------------------------------------------------------" << std::endl;
     std::cout << "请输入要分析的字符串：";
     inputS();
-
+    VecSymbol symbolStack;
+    symbolStack.push_back("$");
+    symbolStack.push_back(S);
+    forwardPointer();
+    Symbol X;
+    do {
+        X = symbolStack.back();
+        // X 是终结符号或者 $
+        if (T.find(X) != T.end() || X == "$") {
+            if (X == ch) {
+                symbolStack.pop_back();
+                forwardPointer();
+            }
+            else
+                error(0);
+        }
+        else {
+            if (anaTable[X][ch] == ERR)
+                error(0);
+            else {
+                symbolStack.pop_back();
+                // 将右部产生式逆序压入栈，空则不入栈
+                for (RHS::reverse_iterator symbol = anaTable[X][ch].rbegin(); symbol != anaTable[X][ch].rend() && *symbol != "~"; symbol++)
+                    symbolStack.push_back(*symbol);
+                // 输出产生式
+                std::cout << X << "->";
+                for (RHS::iterator symbol = anaTable[X][ch].begin(); symbol != anaTable[X][ch].end(); symbol++)
+                    std::cout << *symbol;
+                std::cout << std::endl;
+            }
+        }
+    } while (X != "$");
+    std::cout << "识别成功！" << std::endl;
 }
 
 /// @brief 构造 first 集合

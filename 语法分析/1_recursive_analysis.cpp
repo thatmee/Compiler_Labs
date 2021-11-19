@@ -62,6 +62,7 @@ void Grammar::error(int errState)
         std::cout << "错误：缺少运算对象" << std::endl;
         break;
     default:
+        std::cout << "错误" << std::endl;
         break;
     }
     exit(0);

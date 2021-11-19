@@ -18,6 +18,7 @@ using namespace std;
 using Symbol = std::string;
 using SymbolSet = std::set<Symbol>; // 符号集合类型
 using RHS = std::vector<Symbol>;    // 右部产生式 (right hand side) 类型
+using VecSymbol = std::vector<Symbol>;
 using vectorRHS = std::vector<RHS>; // 右部产生式的集合
 using Productions = std::unordered_map<Symbol, vectorRHS>; // 产生式集合类型
 using UpdateMap = std::unordered_map<Symbol, SymbolSet>;
@@ -32,7 +33,7 @@ private:
     SymbolSet T; // 终结符集合
     Productions P;       // 产生式
     Symbol S;        // 文法起始符号 S
-    std::vector<Symbol> s; // 待分析的串
+    VecSymbol s; // 待分析的串
     int pointer = -1;   // 当前指向的位置
     Symbol ch = "";            // 当前指向的字符
 
