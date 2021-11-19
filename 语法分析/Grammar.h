@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <map>
 
 using namespace std;
 
@@ -27,8 +28,8 @@ using SymbolTable = std::unordered_map<Symbol, std::unordered_map<Symbol, RHS>>;
 
 using ProdSplit = std::pair<Symbol, RHS>;
 using ProdCnt = std::unordered_map<int, ProdSplit>;
-using Project = std::pair<ProdSplit, VecSymbol>;
-using ProjectMap = std::unordered_map<ProdSplit, VecSymbol>;
+using Project = std::pair<ProdSplit, SymbolSet>;
+using ProjectMap = std::map<ProdSplit, SymbolSet>;
 //using ProjectSet = std::set<Project>;
 using ProjectCluster = std::unordered_map<int, ProjectMap>;
 using ActGotoTable = std::unordered_map<int, std::unordered_map<Symbol, std::string>>;
