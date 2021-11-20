@@ -3,11 +3,15 @@
 
 /// @brief LR(1) 分析程序
 void Grammar::LR1Analysis() {
-
     extensionGrammar();
     buildProjCluster();
     outputProjCluster();
-    buildLR1AnaTable();
+    outputLR1AnaTable();
+
+    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << "请输入要分析的字符串：";
+    inputS();
+
 
 }
 
@@ -74,15 +78,28 @@ void Grammar::closure(ProjectMap& I, ProjectMap& J) {
 }
 
 /// @brief 转移函数 go，resultI = go[I, X]
-void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI) {
+/// @param Inumber 代表项目集 I 的序号，用于构造分析表
+void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI, int Inumber) {
     ProjectMap J;
     // 遍历每一个项目
     for (ProjectMap::iterator iterP = I.begin(); iterP != I.end(); iterP++) {
         ProdSplit curProd = iterP->first;
         RHS curProdRHS = curProd.second;
-        // 归约项目没有后继
-        if (curProdRHS.back() == ".")
+        // 归约项目
+        if (curProdRHS.back() == ".") {
+            // 更新分析表
+            // 左部是 S'，更新 action 表为接受动作
+            if (curProd.first == "S'")
+                LR1AnaTable[Inumber]["$"] = "ACC";
+            // 左部不是 S'，更新 action 表为归约动作
+            else {
+                curProd.second.pop_back(); // 去掉末尾的点
+                for (SymbolSet::iterator iterS = iterP->second.begin(); iterS != iterP->second.end(); iterS++)
+                    LR1AnaTable[Inumber][*iterS] = "R" + std::to_string(getProductCnt(curProd));
+            }
+            // 归约项目没有后继，跳过后续处理
             continue;
+        }
         RHS::iterator pointLoc = find(curProdRHS.begin(), curProdRHS.end(), ".");
         // 找到了 .
         if (pointLoc != curProdRHS.end()) {
@@ -98,6 +115,14 @@ void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI) {
         }
     }
     closure(J, resultI);
+}
+
+/// @brief 获取产生式的序号
+int Grammar::getProductCnt(ProdSplit& p) {
+    for (ProdCnt::iterator iterPC = extensionP.begin(); iterPC != extensionP.end(); iterPC++) {
+        if (p == iterPC->second)
+            return iterPC->first;
+    }
 }
 
 /// @brief 拓广文法并对拓广后的文法产生式进行编号
@@ -135,7 +160,7 @@ void Grammar::buildProjCluster() {
             // 遍历终结符
             for (SymbolSet::iterator iterT = T.begin(); iterT != T.end(); iterT++) {
                 ProjectMap tmpPM;
-                go(iterPM->second, *iterT, tmpPM);
+                go(iterPM->second, *iterT, tmpPM, iterPM->first);
                 if (tmpPM.size() != 0) {
                     // 查看 C中有没有这个项目集
                     int isExist = 0;
@@ -163,7 +188,7 @@ void Grammar::buildProjCluster() {
             //遍历非终结符
             for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
                 ProjectMap tmpPM;
-                go(iterPM->second, *iterN, tmpPM);
+                go(iterPM->second, *iterN, tmpPM, iterPM->first);
                 if (tmpPM.size() != 0) {
                     // 查看 C中有没有这个项目集
                     int isExist = 0;
@@ -196,4 +221,43 @@ void Grammar::buildProjCluster() {
 /// @brief 构造 LR(1) 分析表
 void Grammar::buildLR1AnaTable() {
 
+}
+
+/// @brief 输出 LR(1) 分析表
+void Grammar::outputLR1AnaTable() {
+    // 输出表头
+    std::cout << "state\t";
+    for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++)
+        std::cout << *iterS << "\t";
+    std::cout << "$\t";
+    for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++) {
+        if (*iterS != "S'")
+            std::cout << *iterS << "\t";
+    }
+
+    std::cout << std::endl;
+    // 输出分析表内容
+    for (int i = 0; i < LR1AnaTable.size(); i++) {
+        std::cout << i << "\t";
+        // 对所有终结符输出 action
+        for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++) {
+            std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
+            if (loc != LR1AnaTable[i].end())
+                std::cout << loc->second;
+            std::cout << "\t";
+        }
+        // 对 $ 输出 action
+        std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find("$");
+        if (loc != LR1AnaTable[i].end())
+            std::cout << loc->second;
+        std::cout << "\t";
+        // 对非终结符输出 goto
+        for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++) {
+            std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
+            if (loc != LR1AnaTable[i].end())
+                std::cout << loc->second;
+            std::cout << "\t";
+        }
+        std::cout << std::endl;
+    }
 }

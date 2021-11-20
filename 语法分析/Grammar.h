@@ -77,11 +77,13 @@ private:
     void buildLL1AnaTable(); // 构造预测分析表
 
     void closure(ProjectMap&, ProjectMap&);
-    void go(ProjectMap, Symbol, ProjectMap&);
+    void go(ProjectMap, Symbol, ProjectMap&, int);
     void extensionGrammar();
+    int getProductCnt(ProdSplit&);
     void buildProjCluster();
     void buildLR1AnaTable();
     void outputProjCluster();
+    void outputLR1AnaTable();
 
 
 public:
