@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file 2_LL(1)_analysis.cpp
  * @author NanYafeng
  * @brief LL(1) 分析程序相关的函数实现
@@ -21,7 +21,7 @@ void Grammar::LL1Analysis()
     outputLL1AnaTable();
 
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "请输入要分析的字符串：";
     inputS();
     VecSymbol symbolStack;
@@ -87,7 +87,7 @@ void Grammar::buildFirst()
 /// @brief 找一连串符号的 first 集合
 /// @param std::vector<Symbol> vecSymbol 输入的一连串符号
 /// @param SymbolSet& firstSet 结果保存的集合
-void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet &firstSet)
+void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet& firstSet)
 {
     // 遍历符号串的所有符号
     for (int i = 0; i < vecSymbol.size(); i++)
@@ -105,7 +105,7 @@ void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet &firstSe
 /// @brief 找某一个符号的 first 集合
 /// @param a 需要分析 first 集合的符号
 /// @param firstSet 结果保存的集合
-void Grammar::firstOfOneSymbol(Symbol a, SymbolSet &firstSet)
+void Grammar::firstOfOneSymbol(Symbol a, SymbolSet& firstSet)
 {
     // 要分析的符号是终结符，则其 first 集合是它本身
     if (T.find(a) != T.end())
@@ -186,7 +186,7 @@ void Grammar::buildFollow()
 }
 
 /// @brief 从a符号开始递归更新 follow 集
-void Grammar::recurUpdFollow(Symbol a, UpdateMap &update)
+void Grammar::recurUpdFollow(Symbol a, UpdateMap& update)
 {
     UpdateMap::iterator aLoc = update.find(a);
     if (aLoc == update.end())
@@ -233,7 +233,7 @@ void Grammar::buildLL1AnaTable()
         for (SymbolSet::iterator row = rowSet.begin(); row != rowSet.end(); row++)
         {
             if (LL1AnaTable[*line].find(*row) == LL1AnaTable[*line].end())
-                LL1AnaTable[*line].insert(std::pair<Symbol, RHS>(*row, {"ERR"}));
+                LL1AnaTable[*line].insert(std::pair<Symbol, RHS>(*row, { "ERR" }));
         }
     }
 }
@@ -242,11 +242,11 @@ void Grammar::buildLL1AnaTable()
 void Grammar::outputFirstFollow()
 {
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "输出 FIRST FOLLOW：" << std::endl;
     // 输出表头
     std::cout << "symbol\t" << setfill(' ') << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << "first\t"
-              << "follow" << std::endl;
+        << "follow" << std::endl;
     for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
     {
         std::string oLine = "";
@@ -265,7 +265,7 @@ void Grammar::outputFirstFollow()
 void Grammar::outputLL1AnaTable()
 {
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "输出 LL(1) 分析表：" << std::endl;
 
     // 输出表头
