@@ -27,6 +27,9 @@
     <ClCompile Include="2_LL(1)_analysis.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="3_LR(1)_analysis.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Grammar.h">

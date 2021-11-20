@@ -1,4 +1,4 @@
-﻿/******** 自顶向下递归调用分析程序 *******
+/******** 自顶向下递归调用分析程序 *******
  *              【注意】                *
  *      递归调用分析程序与文法形式相关    *
  *        因此本程序仅针对一种文法       *
@@ -14,8 +14,6 @@
  *           F->(E)|n                  *
  ***************************************/
 
-#include <iostream>
-#include <string>
 #include "Grammar.h"
 
 using namespace std;
@@ -23,16 +21,21 @@ using namespace std;
 /// @brief 自顶向下递归调用分析程序
 void Grammar::recursiveAnalysis()
 {
-    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "消除左递归后的文法：" << std::endl;
     std::cout << "E->TE'" << std::endl;
     std::cout << "E'->+TE'|-TE'|~" << std::endl;
     std::cout << "T->FT'" << std::endl;
     std::cout << "T'->*FT'|/FT'|~" << std::endl;
     std::cout << "F->(E)|num" << std::endl;
-    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "请输入要分析的字符串：";
     inputS();
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "分析过程如下：" << std::endl;
     forwardPointer();
     std::cout << "起始状态：当前字符 " + this->ch + ", 等待归约出 E" << std::endl;
     this->procE();
@@ -62,6 +65,7 @@ void Grammar::error(int errState)
         std::cout << "错误：缺少运算对象" << std::endl;
         break;
     default:
+        std::cout << "错误" << std::endl;
         break;
     }
     exit(0);
@@ -114,7 +118,7 @@ void Grammar::procF()
         else
             error(ERR_MISSING_R_BRACKET);
     }
-    else if (ch == "n")
+    else if (ch == "num")
     {
         std::cout << "状态 14：当前字符 " + ch + "，使用 F->n 归约，到达终结状态 17，返回上一级递归" << std::endl;
         forwardPointer();

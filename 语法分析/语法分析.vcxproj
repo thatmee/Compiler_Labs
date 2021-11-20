@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="1_recursive_analysis.cpp" />
     <ClCompile Include="2_LL(1)_analysis.cpp" />
+    <ClCompile Include="3_LR(1)_analysis.cpp" />
     <ClCompile Include="Grammar.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
