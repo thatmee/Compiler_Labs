@@ -1,18 +1,28 @@
+/**
+ * @file 3_LR(1)_analysis.cpp
+ * @author NanYafeng
+ * @brief LR(1) åˆ†æç¨‹åºç›¸å…³çš„å‡½æ•°å®ç°
+ * @version 1.0
+ * @date 2021-11-21
+ */
 #include "Grammar.h"
 
-/// @brief LR(1) ·ÖÎö³ÌĞò
-void Grammar::LR1Analysis() {
+/// @brief LR(1) åˆ†æç¨‹åº
+void Grammar::LR1Analysis()
+{
     extensionGrammar();
     outputExtentionG();
     buildProjCluster();
     outputProjCluster();
     outputLR1AnaTable();
 
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "ÇëÊäÈëÒª·ÖÎöµÄ×Ö·û´®£¬·ûºÅÖ®¼äÊ¹ÓÃ¿Õ¸ñ·Ö¸ô£º";
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "è¯·è¾“å…¥è¦åˆ†æçš„å­—ç¬¦ä¸²ï¼Œç¬¦å·ä¹‹é—´ä½¿ç”¨ç©ºæ ¼åˆ†éš”ï¼š";
     inputS();
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "·ÖÎö¹ı³ÌÈçÏÂ£º" << std::endl;
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "åˆ†æè¿‡ç¨‹å¦‚ä¸‹ï¼š" << std::endl;
 
     std::vector<int> stateStack;
     VecSymbol symbolStack;
@@ -20,118 +30,121 @@ void Grammar::LR1Analysis() {
     symbolStack.push_back("-");
     forwardPointer();
     int stateS = 0;
-    do {
+    do
+    {
         stateS = stateStack.back();
-        // ´íÎó×´Ì¬
+        // é”™è¯¯çŠ¶æ€
         if (LR1AnaTable[stateS].find(ch) == LR1AnaTable[stateS].end())
             error(0);
-        // ·ÖÎö±íÖĞÓĞÏàÓ¦µÄ¶¯×÷»ò goto Ä¿±ê
-        else {
+        // åˆ†æè¡¨ä¸­æœ‰ç›¸åº”çš„åŠ¨ä½œæˆ– goto ç›®æ ‡
+        else
+        {
             std::string action = LR1AnaTable[stateS][ch];
-            // ÒÆ½ø¶¯×÷
-            if (action[0] == 'S') {
-                // ½«µ±Ç°·ûºÅÑ¹Èë·ûºÅÕ»
+            // ç§»è¿›åŠ¨ä½œ
+            if (action[0] == 'S')
+            {
+                // å°†å½“å‰ç¬¦å·å‹å…¥ç¬¦å·æ ˆ
                 symbolStack.push_back(ch);
-                // ½«×ªÒÆºóµÄ×´Ì¬Ñ¹Èë×´Ì¬Õ»
+                // å°†è½¬ç§»åçš„çŠ¶æ€å‹å…¥çŠ¶æ€æ ˆ
                 stateStack.push_back(std::stoi(action.substr(1)));
-                // Ç°ÒÆÖ¸Õë
+                // å‰ç§»æŒ‡é’ˆ
                 forwardPointer();
             }
-            // ¹éÔ¼¶¯×÷
-            else if (action[0] == 'R') {
-                // »ñÈ¡¹éÔ¼ËùÊ¹ÓÃµÄ²úÉúÊ½ A -> ¦Â
+            // å½’çº¦åŠ¨ä½œ
+            else if (action[0] == 'R')
+            {
+                // è·å–å½’çº¦æ‰€ä½¿ç”¨çš„äº§ç”Ÿå¼ A -> Î²
                 int prodN = std::stoi(action.substr(1));
                 ProdSplit p = extensionP[prodN];
-                // ´Ó·ûºÅÕ»¶¥ºÍ×´Ì¬Õ»¶¥µ¯³ö |¦Â| ¸ö·ûºÅ
+                // ä»ç¬¦å·æ ˆé¡¶å’ŒçŠ¶æ€æ ˆé¡¶å¼¹å‡º |Î²| ä¸ªç¬¦å·
                 int lenBeta = p.second.size();
-                for (int i = 0; i < lenBeta; i++) {
+                for (int i = 0; i < lenBeta; i++)
+                {
                     stateStack.pop_back();
                     symbolStack.pop_back();
                 }
-                // ½« A Ñ¹Èë·ûºÅÕ»
+                // å°† A å‹å…¥ç¬¦å·æ ˆ
                 symbolStack.push_back(p.first);
-                // °Ñ¾­¹ı A µ½´ïµÄ×´Ì¬Ñ¹Èë×´Ì¬Õ»
+                // æŠŠç»è¿‡ A åˆ°è¾¾çš„çŠ¶æ€å‹å…¥çŠ¶æ€æ ˆ
                 int curS = stateStack.back();
                 stateStack.push_back(std::stoi(LR1AnaTable[curS][p.first]));
-                // Êä³ö²úÉúÊ½ A -> ¦Â
+                // è¾“å‡ºäº§ç”Ÿå¼ A -> Î²
                 std::cout << p.first << " -> ";
                 for (RHS::iterator iterRHS = p.second.begin(); iterRHS != p.second.end(); iterRHS++)
                     std::cout << *iterRHS << " ";
                 std::cout << std::endl;
             }
-            // ½ÓÊÜ¶¯×÷
+            // æ¥å—åŠ¨ä½œ
             else if (action == "ACC")
                 break;
         }
     } while (1);
-    std::cout << "Ê¶±ğ³É¹¦£¡";
+    std::cout << "è¯†åˆ«æˆåŠŸï¼";
 }
 
-/// @brief Êä³öÍØ¹ãºóµÄÎÄ·¨
-void Grammar::outputExtentionG() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "ÍØ¹ãºóµÄÎÄ·¨Îª£º" << std::endl;
-    for (int i = 0; i < extensionP.size(); i++) {
-        std::cout << "(" << i << ")  " << extensionP[i].first << " -> ";
-        for (RHS::iterator iterRHS = extensionP[i].second.begin(); iterRHS != extensionP[i].second.end(); iterRHS++)
-            std::cout << *iterRHS << " ";
-        std::cout << std::endl;
+/// @brief è·å–äº§ç”Ÿå¼çš„åºå·
+int Grammar::getProductCnt(ProdSplit &p)
+{
+    for (ProdCnt::iterator iterPC = extensionP.begin(); iterPC != extensionP.end(); iterPC++)
+    {
+        if (p == iterPC->second)
+            return iterPC->first;
     }
 }
 
-/// @brief Êä³öÏîÄ¿¼¯¹æ·¶×å
-void Grammar::outputProjCluster() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "ÏîÄ¿¼¯¹æ·¶×åÎª£º" << std::endl;
-    // ±éÀúËùÓĞÏîÄ¿¼¯
-    for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++) {
-        ProjectMap curProjectSet = iterPM->second;
-        std::cout << "I" << std::to_string(iterPM->first) << ":" << std::endl;
-        // ±éÀúÒ»¸öÏîÄ¿¼¯µÄËùÓĞÏîÄ¿
-        for (ProjectMap::iterator iterP = curProjectSet.begin(); iterP != curProjectSet.end(); iterP++) {
-            ProdSplit curProd = iterP->first;
-            SymbolSet curLookAhead = iterP->second;
-            std::cout << curProd.first << " -> ";
-            for (RHS::iterator iterS = curProd.second.begin(); iterS != curProd.second.end(); iterS++)
-                std::cout << *iterS << " ";
-            std::cout << "\t";
-            for (SymbolSet::iterator iterS = curLookAhead.begin(); iterS != curLookAhead.end(); iterS++)
-                std::cout << *iterS << " ";
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
+/// @brief æ‹“å¹¿æ–‡æ³•å¹¶å¯¹æ‹“å¹¿åçš„æ–‡æ³•äº§ç”Ÿå¼è¿›è¡Œç¼–å·
+/// @param resultP æ‹“å¹¿åçš„æ–‡æ³•
+void Grammar::extensionGrammar()
+{
+    // å°† P å†…æ•°æ®è½¬æ¢ä¸ºå•ç‹¬çš„äº§ç”Ÿå¼å­˜å‚¨åˆ° extensionP å¹¶ç¼–å·
+    extensionP[0] = ProdSplit("S'", {{S}});
+    int number = 1; // ç¼–å· 0 ä¸ºæ‹“å¹¿åçš„æ–°èµ·å§‹ç¬¦ S'
+    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
+    {
+        for (VectorRHS::iterator iterRHS = P[*iterN].begin(); iterRHS != P[*iterN].end(); iterRHS++)
+            extensionP[number++] = ProdSplit(*iterN, *iterRHS);
     }
+    // åŠ å…¥æ–°çš„èµ·å§‹ç¬¦ S'ï¼Œä¿®æ”¹ç›¸å…³çš„ä¸€äº›å˜é‡
+    N.insert("S'");
+    P["S'"] = {{S}};
+    S = "S'";
 }
 
-/// @brief ¹¹ÔìÏîÄ¿¼¯ I µÄ±Õ°ü£¬·ÅÔÚ resultI ÖĞ
-/// @param I ÊäÈëÏîÄ¿¼¯
-/// @param resultI ½á¹ûÏîÄ¿¼¯
-void Grammar::closure(ProjectMap& I, ProjectMap& J) {
+/// @brief æ„é€ é¡¹ç›®é›† I çš„é—­åŒ…ï¼Œæ”¾åœ¨ resultI ä¸­
+/// @param I è¾“å…¥é¡¹ç›®é›†
+/// @param resultI ç»“æœé¡¹ç›®é›†
+void Grammar::closure(ProjectMap &I, ProjectMap &J)
+{
     J = I;
     ProjectMap JNew;
-    do {
+    do
+    {
         JNew = J;
-        // ±éÀú JNew ÖĞµÄÃ¿Ò»¸öÏîÄ¿
-        for (ProjectMap::iterator iterP = JNew.begin(); iterP != JNew.end(); iterP++) {
+        // éå† JNew ä¸­çš„æ¯ä¸€ä¸ªé¡¹ç›®
+        for (ProjectMap::iterator iterP = JNew.begin(); iterP != JNew.end(); iterP++)
+        {
             ProdSplit curProd = iterP->first;
             RHS curProdRHS = curProd.second;
-            // ¹éÔ¼ÏîÄ¿±Õ°üÊÇ×ÔÉí£¬²»ÓÃÔÙÀ©Õ¹
+            // å½’çº¦é¡¹ç›®é—­åŒ…æ˜¯è‡ªèº«ï¼Œä¸ç”¨å†æ‰©å±•
             if (curProdRHS.back() == ".")
                 continue;
             RHS::iterator pointLoc = find(curProdRHS.begin(), curProdRHS.end(), ".");
-            // ÕÒµ½ÁË . 
-            if (pointLoc != curProdRHS.end()) {
+            // æ‰¾åˆ°äº† .
+            if (pointLoc != curProdRHS.end())
+            {
                 RHS::iterator nextLoc = pointLoc + 1;
-                // .µÄÏÂÒ»¸ö·ûºÅÊÇ·ÇÖÕ½á·û
-                if (N.find(*nextLoc) != N.end()) {
+                // .çš„ä¸‹ä¸€ä¸ªç¬¦å·æ˜¯éç»ˆç»“ç¬¦
+                if (N.find(*nextLoc) != N.end())
+                {
                     VecSymbol beta = VecSymbol(nextLoc + 1, curProdRHS.end());
                     SymbolSet tmpFirstSet;
                     firstOfVecSymbol(beta, tmpFirstSet);
-                    // first(beta) ÖĞÓĞ¿Õ£¬»òÕßbetaÎª¿Õ£¬½«µ±Ç°ÏîÄ¿µÄÏòÇ°¿´·ûºÅ¼ÓÈëĞÂµÄÏîÄ¿µÄÏòÇ°¿´·ûºÅ
+                    // first(beta) ä¸­æœ‰ç©ºï¼Œæˆ–è€…betaä¸ºç©ºï¼Œå°†å½“å‰é¡¹ç›®çš„å‘å‰çœ‹ç¬¦å·åŠ å…¥æ–°çš„é¡¹ç›®çš„å‘å‰çœ‹ç¬¦å·
                     if (beta.size() == 0 || tmpFirstSet.find("~") != tmpFirstSet.end())
                         tmpFirstSet.insert(iterP->second.begin(), iterP->second.end());
-                    // ±éÀú.ºóÃæµÄ·ÇÖÕ½á·ûµÄËùÓĞ²úÉúÊ½
-                    for (VectorRHS::iterator iterRHS = P[*nextLoc].begin(); iterRHS != P[*nextLoc].end(); iterRHS++) {
+                    // éå†.åé¢çš„éç»ˆç»“ç¬¦çš„æ‰€æœ‰äº§ç”Ÿå¼
+                    for (VectorRHS::iterator iterRHS = P[*nextLoc].begin(); iterRHS != P[*nextLoc].end(); iterRHS++)
+                    {
                         RHS tmpRHS = *iterRHS;
                         tmpRHS.insert(tmpRHS.begin(), ".");
                         ProdSplit tmpProd = ProdSplit(*nextLoc, tmpRHS);
@@ -143,35 +156,41 @@ void Grammar::closure(ProjectMap& I, ProjectMap& J) {
     } while (JNew.size() != J.size());
 }
 
-/// @brief ×ªÒÆº¯Êı go£¬resultI = go[I, X]
-/// @param Inumber ´ú±íÏîÄ¿¼¯ I µÄĞòºÅ£¬ÓÃÓÚ¹¹Ôì·ÖÎö±í
-void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI, int Inumber) {
+/// @brief è½¬ç§»å‡½æ•° goï¼ŒresultI = go[I, X]
+/// @param Inumber ä»£è¡¨é¡¹ç›®é›† I çš„åºå·ï¼Œç”¨äºæ„é€ åˆ†æè¡¨
+void Grammar::go(ProjectMap I, Symbol X, ProjectMap &resultI, int Inumber)
+{
     ProjectMap J;
-    // ±éÀúÃ¿Ò»¸öÏîÄ¿
-    for (ProjectMap::iterator iterP = I.begin(); iterP != I.end(); iterP++) {
+    // éå†æ¯ä¸€ä¸ªé¡¹ç›®
+    for (ProjectMap::iterator iterP = I.begin(); iterP != I.end(); iterP++)
+    {
         ProdSplit curProd = iterP->first;
         RHS curProdRHS = curProd.second;
-        // ¹éÔ¼ÏîÄ¿
-        if (curProdRHS.back() == ".") {
-            // ¸üĞÂ·ÖÎö±í
-            // ×ó²¿ÊÇ S'£¬¸üĞÂ action ±íÎª½ÓÊÜ¶¯×÷
+        // å½’çº¦é¡¹ç›®
+        if (curProdRHS.back() == ".")
+        {
+            // æ›´æ–°åˆ†æè¡¨
+            // å·¦éƒ¨æ˜¯ S'ï¼Œæ›´æ–° action è¡¨ä¸ºæ¥å—åŠ¨ä½œ
             if (curProd.first == "S'")
                 LR1AnaTable[Inumber]["$"] = "ACC";
-            // ×ó²¿²»ÊÇ S'£¬¸üĞÂ action ±íÎª¹éÔ¼¶¯×÷
-            else {
-                curProd.second.pop_back(); // È¥µôÄ©Î²µÄµã
+            // å·¦éƒ¨ä¸æ˜¯ S'ï¼Œæ›´æ–° action è¡¨ä¸ºå½’çº¦åŠ¨ä½œ
+            else
+            {
+                curProd.second.pop_back(); // å»æ‰æœ«å°¾çš„ç‚¹
                 for (SymbolSet::iterator iterS = iterP->second.begin(); iterS != iterP->second.end(); iterS++)
                     LR1AnaTable[Inumber][*iterS] = "R" + std::to_string(getProductCnt(curProd));
             }
-            // ¹éÔ¼ÏîÄ¿Ã»ÓĞºó¼Ì£¬Ìø¹ıºóĞø´¦Àí
+            // å½’çº¦é¡¹ç›®æ²¡æœ‰åç»§ï¼Œè·³è¿‡åç»­å¤„ç†
             continue;
         }
         RHS::iterator pointLoc = find(curProdRHS.begin(), curProdRHS.end(), ".");
-        // ÕÒµ½ÁË .
-        if (pointLoc != curProdRHS.end()) {
+        // æ‰¾åˆ°äº† .
+        if (pointLoc != curProdRHS.end())
+        {
             RHS::iterator nextLoc = pointLoc + 1;
-            if (*nextLoc == X) {
-                // ½« . ÏòÓÒÒÆ¶¯Ò»Î»
+            if (*nextLoc == X)
+            {
+                // å°† . å‘å³ç§»åŠ¨ä¸€ä½
                 curProdRHS.erase(pointLoc);
                 RHS::iterator XLoc = find(curProdRHS.begin(), curProdRHS.end(), X);
                 curProdRHS.insert(XLoc + 1, ".");
@@ -183,32 +202,9 @@ void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI, int Inumber) {
     closure(J, resultI);
 }
 
-/// @brief »ñÈ¡²úÉúÊ½µÄĞòºÅ
-int Grammar::getProductCnt(ProdSplit& p) {
-    for (ProdCnt::iterator iterPC = extensionP.begin(); iterPC != extensionP.end(); iterPC++) {
-        if (p == iterPC->second)
-            return iterPC->first;
-    }
-}
-
-/// @brief ÍØ¹ãÎÄ·¨²¢¶ÔÍØ¹ãºóµÄÎÄ·¨²úÉúÊ½½øĞĞ±àºÅ
-/// @param resultP ÍØ¹ãºóµÄÎÄ·¨
-void Grammar::extensionGrammar() {
-    // ½« P ÄÚÊı¾İ×ª»»Îªµ¥¶ÀµÄ²úÉúÊ½´æ´¢µ½ extensionP ²¢±àºÅ
-    extensionP[0] = ProdSplit("S'", { {S} });
-    int number = 1; // ±àºÅ 0 ÎªÍØ¹ãºóµÄĞÂÆğÊ¼·û S'
-    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
-        for (VectorRHS::iterator iterRHS = P[*iterN].begin(); iterRHS != P[*iterN].end(); iterRHS++)
-            extensionP[number++] = ProdSplit(*iterN, *iterRHS);
-    }
-    // ¼ÓÈëĞÂµÄÆğÊ¼·û S'£¬ĞŞ¸ÄÏà¹ØµÄÒ»Ğ©±äÁ¿
-    N.insert("S'");
-    P["S'"] = { {S} };
-    S = "S'";
-}
-
-/// @brief ¹¹Ôì LR(1) ÏîÄ¿¼¯¹æ·¶×å
-void Grammar::buildProjCluster() {
+/// @brief æ„é€  LR(1) é¡¹ç›®é›†è§„èŒƒæ—
+void Grammar::buildProjCluster()
+{
     ProjectMap I0;
     ProjectMap st;
     ProdSplit start = extensionP[0];
@@ -219,63 +215,77 @@ void Grammar::buildProjCluster() {
 
     int cnt = 1;
     ProjectCluster CNew;
-    do {
+    do
+    {
         CNew = C;
-        // ±éÀúÃ¿Ò»¸öÏîÄ¿¼¯
-        for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++) {
-            // ±éÀúÖÕ½á·û
-            for (SymbolSet::iterator iterT = T.begin(); iterT != T.end(); iterT++) {
+        // éå†æ¯ä¸€ä¸ªé¡¹ç›®é›†
+        for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++)
+        {
+            // éå†ç»ˆç»“ç¬¦
+            for (SymbolSet::iterator iterT = T.begin(); iterT != T.end(); iterT++)
+            {
                 ProjectMap tmpPM;
                 go(iterPM->second, *iterT, tmpPM, iterPM->first);
-                if (tmpPM.size() != 0) {
-                    // ²é¿´ CÖĞÓĞÃ»ÓĞÕâ¸öÏîÄ¿¼¯
+                if (tmpPM.size() != 0)
+                {
+                    // æŸ¥çœ‹ Cä¸­æœ‰æ²¡æœ‰è¿™ä¸ªé¡¹ç›®é›†
                     int isExist = 0;
                     ProjectCluster::iterator iterPos;
-                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++) {
-                        if (tmpPM == iterPos->second) {
+                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++)
+                    {
+                        if (tmpPM == iterPos->second)
+                        {
                             isExist = 1;
                             break;
                         }
                     }
-                    // Èç¹û go[I,X] ²»ÔÚ C ÖĞ
-                    if (!isExist) {
-                        // ½«ĞÂµÄÏîÄ¿¼¯²åÈëµ½ C
+                    // å¦‚æœ go[I,X] ä¸åœ¨ C ä¸­
+                    if (!isExist)
+                    {
+                        // å°†æ–°çš„é¡¹ç›®é›†æ’å…¥åˆ° C
                         C.insert(std::pair<int, ProjectMap>(cnt, tmpPM));
-                        // ¸üĞÂ action ±í
+                        // æ›´æ–° action è¡¨
                         LR1AnaTable[iterPM->first][*iterT] = "S" + std::to_string(cnt);
                         cnt++;
                     }
-                    // Èç¹û go[I,X] ÔÚ C ÖĞ£¬¸üĞÂ action ±í
-                    if (isExist) {
+                    // å¦‚æœ go[I,X] åœ¨ C ä¸­ï¼Œæ›´æ–° action è¡¨
+                    if (isExist)
+                    {
                         LR1AnaTable[iterPM->first][*iterT] = "S" + std::to_string(iterPos->first);
                     }
                 }
             }
-            //±éÀú·ÇÖÕ½á·û
-            for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+            //éå†éç»ˆç»“ç¬¦
+            for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
+            {
                 ProjectMap tmpPM;
                 go(iterPM->second, *iterN, tmpPM, iterPM->first);
-                if (tmpPM.size() != 0) {
-                    // ²é¿´ CÖĞÓĞÃ»ÓĞÕâ¸öÏîÄ¿¼¯
+                if (tmpPM.size() != 0)
+                {
+                    // æŸ¥çœ‹ Cä¸­æœ‰æ²¡æœ‰è¿™ä¸ªé¡¹ç›®é›†
                     int isExist = 0;
                     ProjectCluster::iterator iterPos;
-                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++) {
-                        if (tmpPM == iterPos->second) {
+                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++)
+                    {
+                        if (tmpPM == iterPos->second)
+                        {
                             isExist = 1;
                             break;
                         }
                     }
-                    // Èç¹û go[I,X] ²»Îª¿Õ£¬ÇÒ²»ÔÚ C ÖĞ
-                    if (!isExist) {
-                        // ½«ĞÂµÄÏîÄ¿¼¯²åÈëµ½ C
+                    // å¦‚æœ go[I,X] ä¸ä¸ºç©ºï¼Œä¸”ä¸åœ¨ C ä¸­
+                    if (!isExist)
+                    {
+                        // å°†æ–°çš„é¡¹ç›®é›†æ’å…¥åˆ° C
                         C.insert(std::pair<int, ProjectMap>(cnt, tmpPM));
-                        // ¸üĞÂ goto ±í
+                        // æ›´æ–° goto è¡¨
                         LR1AnaTable[iterPM->first][*iterN] = std::to_string(cnt);
                         cnt++;
                     }
 
-                    // Èç¹û go[I,X] ÔÚ C ÖĞ£¬¸üĞÂ goto ±í
-                    if (isExist) {
+                    // å¦‚æœ go[I,X] åœ¨ C ä¸­ï¼Œæ›´æ–° goto è¡¨
+                    if (isExist)
+                    {
                         LR1AnaTable[iterPM->first][*iterN] = std::to_string(iterPos->first);
                     }
                 }
@@ -284,44 +294,94 @@ void Grammar::buildProjCluster() {
     } while (CNew.size() != C.size());
 }
 
-/// @brief Êä³ö LR(1) ·ÖÎö±í
-void Grammar::outputLR1AnaTable() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "LR(1) ·ÖÎö±íÎª£º" << std::endl;
-    // Êä³ö±íÍ·
+/// @brief è¾“å‡º LR(1) åˆ†æè¡¨
+void Grammar::outputLR1AnaTable()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "LR(1) åˆ†æè¡¨ä¸ºï¼š" << std::endl;
+    // è¾“å‡ºè¡¨å¤´
     std::cout << "state\t";
     for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++)
         std::cout << *iterS << "\t";
     std::cout << "$\t";
-    for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++) {
+    for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++)
+    {
         if (*iterS != "S'")
             std::cout << *iterS << "\t";
     }
 
     std::cout << std::endl;
-    // Êä³ö·ÖÎö±íÄÚÈİ
-    for (int i = 0; i < LR1AnaTable.size(); i++) {
+    // è¾“å‡ºåˆ†æè¡¨å†…å®¹
+    for (int i = 0; i < LR1AnaTable.size(); i++)
+    {
         std::cout << i << "\t";
-        // ¶ÔËùÓĞÖÕ½á·ûÊä³ö action
-        for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++) {
+        // å¯¹æ‰€æœ‰ç»ˆç»“ç¬¦è¾“å‡º action
+        for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++)
+        {
             std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
             if (loc != LR1AnaTable[i].end())
                 std::cout << loc->second;
             std::cout << "\t";
         }
-        // ¶Ô $ Êä³ö action
+        // å¯¹ $ è¾“å‡º action
         std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find("$");
         if (loc != LR1AnaTable[i].end())
             std::cout << loc->second;
         std::cout << "\t";
-        // ¶Ô·ÇÖÕ½á·ûÊä³ö goto
-        for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++) {
-            if (*iterS != "S'") {
+        // å¯¹éç»ˆç»“ç¬¦è¾“å‡º goto
+        for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++)
+        {
+            if (*iterS != "S'")
+            {
                 std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
                 if (loc != LR1AnaTable[i].end())
                     std::cout << loc->second;
                 std::cout << "\t";
             }
+        }
+        std::cout << std::endl;
+    }
+}
+
+/// @brief è¾“å‡ºæ‹“å¹¿åçš„æ–‡æ³•
+void Grammar::outputExtentionG()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "æ‹“å¹¿åçš„æ–‡æ³•ä¸ºï¼š" << std::endl;
+    for (int i = 0; i < extensionP.size(); i++)
+    {
+        std::cout << "(" << i << ")  " << extensionP[i].first << " -> ";
+        for (RHS::iterator iterRHS = extensionP[i].second.begin(); iterRHS != extensionP[i].second.end(); iterRHS++)
+            std::cout << *iterRHS << " ";
+        std::cout << std::endl;
+    }
+}
+
+/// @brief è¾“å‡ºé¡¹ç›®é›†è§„èŒƒæ—
+void Grammar::outputProjCluster()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "é¡¹ç›®é›†è§„èŒƒæ—ä¸ºï¼š" << std::endl;
+    // éå†æ‰€æœ‰é¡¹ç›®é›†
+    for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++)
+    {
+        ProjectMap curProjectSet = iterPM->second;
+        std::cout << "I" << std::to_string(iterPM->first) << ":" << std::endl;
+        // éå†ä¸€ä¸ªé¡¹ç›®é›†çš„æ‰€æœ‰é¡¹ç›®
+        for (ProjectMap::iterator iterP = curProjectSet.begin(); iterP != curProjectSet.end(); iterP++)
+        {
+            ProdSplit curProd = iterP->first;
+            SymbolSet curLookAhead = iterP->second;
+            std::cout << curProd.first << " -> ";
+            for (RHS::iterator iterS = curProd.second.begin(); iterS != curProd.second.end(); iterS++)
+                std::cout << *iterS << " ";
+            std::cout << "\t";
+            for (SymbolSet::iterator iterS = curLookAhead.begin(); iterS != curLookAhead.end(); iterS++)
+                std::cout << *iterS << " ";
+            std::cout << std::endl;
         }
         std::cout << std::endl;
     }

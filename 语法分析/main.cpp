@@ -1,5 +1,12 @@
-﻿#include "Grammar.h"
-#include <iostream>
+﻿/**
+ * @file main.cpp
+ * @author NanYafeng
+ * @brief main 函数
+ * @version 1.0
+ * @date 2021-11-21
+ * 
+ */
+#include "Grammar.h"
 
 void splitLine();
 
@@ -42,6 +49,8 @@ int main(void)
     return 0;
 }
 
-void splitLine() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+void splitLine()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
 }

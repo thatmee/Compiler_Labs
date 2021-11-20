@@ -1,7 +1,7 @@
 ﻿/**
  * @file Grammar.cpp
  * @author Nanyafeng
- * @brief Grammar 类中构造函数、输出函数的实现
+ * @brief Grammar 类中构造函数、文法输入输出函数的实现
  * @version 1.0
  * @date 2021-11-16
  */
@@ -20,28 +20,37 @@ using namespace std;
 ///       E->E+T|E-T|T
 ///       T->T*F|T/F|F
 ///       F->(E)|n
-Grammar::Grammar() {
-    this->N = { "E", "T", "F" };
-    this->T = { "+", "-", "*", "/", "(", ")", "num" };
+Grammar::Grammar()
+{
+    this->N = {"E", "T", "F"};
+    this->T = {"+", "-", "*", "/", "(", ")", "num"};
     this->S = "E";
-    this->P["E"] = { { "E", "+", "T" }, { "E", "-", "T" }, { "T" } };
-    this->P["T"] = { { "T", "*", "F" }, { "T", "/", "F" }, { "F" } };
-    this->P["F"] = { { "(", "E", ")" }, { "num" } };
+    this->P["E"] = {{"E", "+", "T"}, {"E", "-", "T"}, {"T"}};
+    this->P["T"] = {{"T", "*", "F"}, {"T", "/", "F"}, {"F"}};
+    this->P["F"] = {{"(", "E", ")"}, {"num"}};
 }
 
 /// @brief 输出文法
-void Grammar::output() const {
-    for (auto iter1 = this->P.begin(); iter1 != this->P.end(); iter1++) {
+void Grammar::output() const
+{
+    for (auto iter1 = this->P.begin(); iter1 != this->P.end(); iter1++)
+    {
         std::cout << iter1->first << "->"; // 输出每一条产生式的左部和推导符号，如：E->
         VectorRHS tmp = iter1->second;
         int len = static_cast<int>(tmp.size()), j = 0;
-        for (j = 0; j < len - 1; j++) { // 输出每一条产生式的所有右部产生式，如：E+T|E-T|T
-            for (int k = 0; k < tmp[j].size(); k++) { // 输出一个右部产生式，如：E+T
+        // 输出每一条产生式的所有右部产生式，如：E+T|E-T|T
+        for (j = 0; j < len - 1; j++)
+        {
+            for (int k = 0; k < tmp[j].size(); k++)
+            {
+                // 输出一个右部产生式，如：E+T
                 std::cout << tmp[j][k];
             }
             std::cout << "|";
         }
-        for (int k = 0; k < tmp[j].size(); k++) { // 输出最末尾的一个右部产生式
+        for (int k = 0; k < tmp[j].size(); k++)
+        {
+            // 输出最末尾的一个右部产生式
             std::cout << tmp[j][k];
         }
         std::cout << endl;
@@ -50,7 +59,8 @@ void Grammar::output() const {
 
 /// @brief 读取用户输入的文法
 /// @datails 读取之前会先删除原有的文法
-void Grammar::input() {
+void Grammar::input()
+{
     // 清空原有文法
     this->N.clear();
     this->T.clear();
@@ -82,12 +92,13 @@ void Grammar::input() {
     // 读入文法
     std::cout << "请输入文法，要求如下：" << std::endl;
     std::cout << "1. 符号之间以空格分隔，如 F -> num | （ E ）" << std::endl;
-    std::cout << "2. 请输入没有二义性、不含【间接】左递归的文法" << std::endl;
+    std::cout << "2. 请输入当前方案能够分析的文法，如方案二应输入 LL(1) 文法" << std::endl;
     std::cout << "3. 在新行中敲入 # 来结束文法输入" << std::endl;
     std::getline(cin, inputLine);
 
     // 逐行读入，进行处理
-    while (inputLine != "#") {
+    while (inputLine != "#")
+    {
         Symbol begin = "";
         int i = 0, len = static_cast<int>(inputLine.length());
 
@@ -104,8 +115,6 @@ void Grammar::input() {
         {
             std::cout << "错误，出现了未知的非终结符：" << begin << std::endl;
             exit(0);
-            /*std::cin >> inputLine;
-            continue;*/
         }
 
         // 跳过箭头
@@ -124,12 +133,14 @@ void Grammar::input() {
         boost::split(allStrRHS, rightStr, boost::is_any_of("|"));
 
         // 每一个产生式字符串按照空格分隔出终结符、非终结符，存入 allRHS
-        for (int j = 0; j < allStrRHS.size(); j++) {
+        for (int j = 0; j < allStrRHS.size(); j++)
+        {
             RHS oneRHS;
             std::string oneStrRHS = allStrRHS[j];
             boost::split(oneRHS, oneStrRHS, boost::is_any_of(" "));
             // 清除 split 函数可能产生的空串
-            for (RHS::iterator i = oneRHS.begin(); i != oneRHS.end();) {
+            for (RHS::iterator i = oneRHS.begin(); i != oneRHS.end();)
+            {
                 if (*i == "")
                     i = oneRHS.erase(i);
                 else
@@ -149,7 +160,8 @@ void Grammar::input() {
 }
 
 /// @brief 读取要分析的字符串
-void Grammar::inputS() {
+void Grammar::inputS()
+{
     std::string str;
     char ch = getchar();
     std::getline(cin, str);
@@ -158,7 +170,8 @@ void Grammar::inputS() {
     int i = 0, len = static_cast<int>(str.size());
     boost::split(s, str, boost::is_any_of(" "));
     // 清除 split 函数可能产生的空串
-    for (RHS::iterator i = s.begin(); i != s.end();) {
+    for (RHS::iterator i = s.begin(); i != s.end();)
+    {
         if (*i == "")
             i = s.erase(i);
         else

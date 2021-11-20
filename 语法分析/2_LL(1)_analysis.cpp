@@ -1,46 +1,59 @@
+/**
+ * @file 2_LL(1)_analysis.cpp
+ * @author NanYafeng
+ * @brief LL(1) åˆ†æç¨‹åºç›¸å…³çš„å‡½æ•°å®ç°
+ * @version 1.0
+ * @date 2021-11-21
+ */
 #include "Grammar.h"
-#include <iostream>
 
-const int FIRST_O_WIDTH = 20;
-const int TABLE_O_WIDTH = 20;
+const int FIRST_O_WIDTH = 20; // ç”¨äºæ§åˆ¶æ ¼å¼è¾“å‡ºï¼Œfirst è¡¨çš„åˆ—å®½
+const int TABLE_O_WIDTH = 20; // ç”¨äºæ§åˆ¶æ ¼å¼è¾“å‡ºï¼Œåˆ†æè¡¨çš„åˆ—å®½
 
-/// @brief LL(1) ·ÖÎö³ÌĞò
-void Grammar::LL1Analysis() {
+/// @brief LL(1) åˆ†æç¨‹åº
+void Grammar::LL1Analysis()
+{
     // rewriteGrammar();
     buildFirst();
     buildFollow();
     buildLL1AnaTable();
     outputFirstFollow();
-    outputAnaTable();
+    outputLL1AnaTable();
 
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "ÇëÊäÈëÒª·ÖÎöµÄ×Ö·û´®£º";
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "è¯·è¾“å…¥è¦åˆ†æçš„å­—ç¬¦ä¸²ï¼š";
     inputS();
     VecSymbol symbolStack;
     symbolStack.push_back("$");
     symbolStack.push_back(S);
     forwardPointer();
     Symbol X;
-    do {
+    do
+    {
         X = symbolStack.back();
-        // X ÊÇÖÕ½á·ûºÅ»òÕß $
-        if (T.find(X) != T.end() || X == "$") {
-            if (X == ch) {
+        // X æ˜¯ç»ˆç»“ç¬¦å·æˆ–è€… $
+        if (T.find(X) != T.end() || X == "$")
+        {
+            if (X == ch)
+            {
                 symbolStack.pop_back();
                 forwardPointer();
             }
             else
                 error(0);
         }
-        else {
+        else
+        {
             if (LL1AnaTable[X][ch] == ERR)
                 error(0);
-            else {
+            else
+            {
                 symbolStack.pop_back();
-                // ½«ÓÒ²¿²úÉúÊ½ÄæĞòÑ¹ÈëÕ»£¬¿ÕÔò²»ÈëÕ»
+                // å°†å³éƒ¨äº§ç”Ÿå¼é€†åºå‹å…¥æ ˆï¼Œç©ºåˆ™ä¸å…¥æ ˆ
                 for (RHS::reverse_iterator symbol = LL1AnaTable[X][ch].rbegin(); symbol != LL1AnaTable[X][ch].rend() && *symbol != "~"; symbol++)
                     symbolStack.push_back(*symbol);
-                // Êä³ö²úÉúÊ½
+                // è¾“å‡ºäº§ç”Ÿå¼
                 std::cout << X << "->";
                 for (RHS::iterator symbol = LL1AnaTable[X][ch].begin(); symbol != LL1AnaTable[X][ch].end(); symbol++)
                     std::cout << *symbol;
@@ -48,95 +61,110 @@ void Grammar::LL1Analysis() {
             }
         }
     } while (X != "$");
-    std::cout << "Ê¶±ğ³É¹¦£¡" << std::endl;
+    std::cout << "è¯†åˆ«æˆåŠŸï¼" << std::endl;
 }
 
-/// @brief ¹¹Ôì first ¼¯ºÏ
-void Grammar::buildFirst() {
-    // ±éÀúËùÓĞµÄ·ÇÖÕ½á·û
-    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++) {
+/// @brief æ„é€  first é›†åˆ
+void Grammar::buildFirst()
+{
+    // éå†æ‰€æœ‰çš„éç»ˆç»“ç¬¦
+    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++)
+    {
         VectorRHS rhss = P[(*iter)];
-        // ±éÀúÒ»¸ö·ÇÖÕ½á·ûµÄËùÓĞÓÒ²¿²úÉúÊ½
-        for (int j = 0; j < rhss.size(); j++) {
+        // éå†ä¸€ä¸ªéç»ˆç»“ç¬¦çš„æ‰€æœ‰å³éƒ¨äº§ç”Ÿå¼
+        for (int j = 0; j < rhss.size(); j++)
+        {
             RHS oneRHS = rhss[j];
             SymbolSet firstOfOneRHS;
-            // ÕÒµ½µ±Ç°ÓÒ²¿²úÉúÊ½µÄ first ¼¯ºÏ£¬±£´æÔÚ firstOfOneRHS ÖĞ
+            // æ‰¾åˆ°å½“å‰å³éƒ¨äº§ç”Ÿå¼çš„ first é›†åˆï¼Œä¿å­˜åœ¨ firstOfOneRHS ä¸­
             firstOfVecSymbol(oneRHS, firstOfOneRHS);
-            // ½«µ±Ç°ÓÒ²¿²úÉúÊ½µÄ first ¼¯ºÏ¼ÓÈëµ½¶ÔÓ¦×ó²¿µÄ first ¼¯ºÏÖĞ
+            // å°†å½“å‰å³éƒ¨äº§ç”Ÿå¼çš„ first é›†åˆåŠ å…¥åˆ°å¯¹åº”å·¦éƒ¨çš„ first é›†åˆä¸­
             first[*iter].insert(firstOfOneRHS.begin(), firstOfOneRHS.end());
         }
     }
 }
 
-/// @brief ÕÒÒ»Á¬´®·ûºÅµÄ first ¼¯ºÏ
-/// @param std::vector<Symbol> vecSymbol ÊäÈëµÄÒ»Á¬´®·ûºÅ
-/// @param SymbolSet& firstSet ½á¹û±£´æµÄ¼¯ºÏ 
-void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet& firstSet) {
-    // ±éÀú·ûºÅ´®µÄËùÓĞ·ûºÅ
-    for (int i = 0; i < vecSymbol.size(); i++) {
+/// @brief æ‰¾ä¸€è¿ä¸²ç¬¦å·çš„ first é›†åˆ
+/// @param std::vector<Symbol> vecSymbol è¾“å…¥çš„ä¸€è¿ä¸²ç¬¦å·
+/// @param SymbolSet& firstSet ç»“æœä¿å­˜çš„é›†åˆ
+void Grammar::firstOfVecSymbol(std::vector<Symbol> vecSymbol, SymbolSet &firstSet)
+{
+    // éå†ç¬¦å·ä¸²çš„æ‰€æœ‰ç¬¦å·
+    for (int i = 0; i < vecSymbol.size(); i++)
+    {
         SymbolSet tmpFirstSet;
-        // ´Ó·ûºÅ´®µÄµÚÒ»¸ö·ûºÅ¿ªÊ¼ÕÒ first ¼¯
+        // ä»ç¬¦å·ä¸²çš„ç¬¬ä¸€ä¸ªç¬¦å·å¼€å§‹æ‰¾ first é›†
         firstOfOneSymbol(vecSymbol[i], tmpFirstSet);
         firstSet.insert(tmpFirstSet.begin(), tmpFirstSet.end());
-        // Èç¹ûÕë¶Ôµ±Ç°·ûºÅÕÒµ½µÄ first ¼¯ÀïÃ»ÓĞ ~£¬Ôò½áÊøÑ°ÕÒ
+        // å¦‚æœé’ˆå¯¹å½“å‰ç¬¦å·æ‰¾åˆ°çš„ first é›†é‡Œæ²¡æœ‰ ~ï¼Œåˆ™ç»“æŸå¯»æ‰¾
         if (tmpFirstSet.find("~") == tmpFirstSet.end())
             break;
     }
 }
 
-/// @brief ÕÒÄ³Ò»¸ö·ûºÅµÄ first ¼¯ºÏ
-/// @param a ĞèÒª·ÖÎö first ¼¯ºÏµÄ·ûºÅ
-/// @param firstSet ½á¹û±£´æµÄ¼¯ºÏ
-void Grammar::firstOfOneSymbol(Symbol a, SymbolSet& firstSet) {
-    // Òª·ÖÎöµÄ·ûºÅÊÇÖÕ½á·û£¬ÔòÆä first ¼¯ºÏÊÇËü±¾Éí
-    if (T.find(a) != T.end()) {
+/// @brief æ‰¾æŸä¸€ä¸ªç¬¦å·çš„ first é›†åˆ
+/// @param a éœ€è¦åˆ†æ first é›†åˆçš„ç¬¦å·
+/// @param firstSet ç»“æœä¿å­˜çš„é›†åˆ
+void Grammar::firstOfOneSymbol(Symbol a, SymbolSet &firstSet)
+{
+    // è¦åˆ†æçš„ç¬¦å·æ˜¯ç»ˆç»“ç¬¦ï¼Œåˆ™å…¶ first é›†åˆæ˜¯å®ƒæœ¬èº«
+    if (T.find(a) != T.end())
+    {
         firstSet.insert(a);
         return;
     }
-    // Òª·ÖÎöµÄ·ûºÅÊÇ·ÇÖÕ½á·û£¬µİ¹é²éÕÒ first ¼¯ºÏ
-    else {
+    // è¦åˆ†æçš„ç¬¦å·æ˜¯éç»ˆç»“ç¬¦ï¼Œé€’å½’æŸ¥æ‰¾ first é›†åˆ
+    else
+    {
         VectorRHS rhss = P[a];
-        for (int i = 0; i < rhss.size(); i++) {
+        for (int i = 0; i < rhss.size(); i++)
+        {
             RHS oneRHS = rhss[i];
             firstOfVecSymbol(oneRHS, firstSet);
         }
     }
 }
 
-/// @brief ¹¹Ôì follow ¼¯ºÏ
-void Grammar::buildFollow() {
-    // ±£´æ follow ¼¯Ö®¼äµÄ¸üĞÂÊ½
+/// @brief æ„é€  follow é›†åˆ
+void Grammar::buildFollow()
+{
+    // ä¿å­˜ follow é›†ä¹‹é—´çš„æ›´æ–°å¼
     UpdateMap update;
-    // ±éÀúËùÓĞ²úÉúÊ½£¬Íê³É£º
-    // 1. ½â¾öÓë first ¼¯ºÏÏà¹ØµÄËùÓĞ follow ¼¯ºÏ¸üĞÂ
-    // 2. ½«ËùÓĞ follow ¼¯Ö®¼äµÄÏà»¥¸üĞÂÊ½±£´æÏÂÀ´
-    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++) {
+    // éå†æ‰€æœ‰äº§ç”Ÿå¼ï¼Œå®Œæˆï¼š
+    // 1. è§£å†³ä¸ first é›†åˆç›¸å…³çš„æ‰€æœ‰ follow é›†åˆæ›´æ–°
+    // 2. å°†æ‰€æœ‰ follow é›†ä¹‹é—´çš„ç›¸äº’æ›´æ–°å¼ä¿å­˜ä¸‹æ¥
+    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++)
+    {
         VectorRHS rhss = P[(*iter)];
-        // ±éÀúÒ»¸ö·ÇÖÕ½á·ûµÄËùÓĞÓÒ²¿²úÉúÊ½
-        for (VectorRHS::iterator iterJ = rhss.begin(); iterJ != rhss.end(); iterJ++) {
+        // éå†ä¸€ä¸ªéç»ˆç»“ç¬¦çš„æ‰€æœ‰å³éƒ¨äº§ç”Ÿå¼
+        for (VectorRHS::iterator iterJ = rhss.begin(); iterJ != rhss.end(); iterJ++)
+        {
             RHS oneRHS = *iterJ;
-            // ±éÀúÒ»¸öÓÒ²¿²úÉúÊ½µÄËùÓĞ·ûºÅ
-            for (RHS::iterator iterK = oneRHS.begin(); iterK != oneRHS.end(); iterK++) {
-                // ¶ÔÃ¿Ò»¸ö·ÇÖÕ½á·û£¬½«ËüºóÃæµÄ·ûºÅ´®µÄ first ¼¯ºÏ¸³¸øËüµÄ follow ¼¯
-                if (N.find(*iterK) != N.end()) {
+            // éå†ä¸€ä¸ªå³éƒ¨äº§ç”Ÿå¼çš„æ‰€æœ‰ç¬¦å·
+            for (RHS::iterator iterK = oneRHS.begin(); iterK != oneRHS.end(); iterK++)
+            {
+                // å¯¹æ¯ä¸€ä¸ªéç»ˆç»“ç¬¦ï¼Œå°†å®ƒåé¢çš„ç¬¦å·ä¸²çš„ first é›†åˆèµ‹ç»™å®ƒçš„ follow é›†
+                if (N.find(*iterK) != N.end())
+                {
                     SymbolSet tmpFirstSet;
                     std::vector<Symbol> behind = std::vector<Symbol>(iterK + 1, oneRHS.end());
                     firstOfVecSymbol(behind, tmpFirstSet);
                     follow[*iterK].insert(tmpFirstSet.begin(), tmpFirstSet.end());
                 }
             }
-            // µ¹×Å±éÀúÒ»¸öÓÒ²¿²úÉúÊ½µÄËùÓĞ·ûºÅ
-            for (RHS::reverse_iterator iterP = oneRHS.rbegin(); iterP != oneRHS.rend(); iterP++) {
-                // Èç¹ûÓöµ½ÁËÖÕ½á·û£¬²»²úÉú¸üĞÂÊ½
+            // å€’ç€éå†ä¸€ä¸ªå³éƒ¨äº§ç”Ÿå¼çš„æ‰€æœ‰ç¬¦å·
+            for (RHS::reverse_iterator iterP = oneRHS.rbegin(); iterP != oneRHS.rend(); iterP++)
+            {
+                // å¦‚æœé‡åˆ°äº†ç»ˆç»“ç¬¦ï¼Œä¸äº§ç”Ÿæ›´æ–°å¼
                 if (T.find(*iterP) != T.end())
                     break;
-                // Óöµ½ÁË·ÇÖÕ½á·û
+                // é‡åˆ°äº†éç»ˆç»“ç¬¦
                 else
                 {
-                    // µ±Ç°·ÇÖÕ½á·û £¡= ×ó²¿Ê±£¬¼ÓÈëĞÂµÄ¸üĞÂÊ½£ºµ±Ç°×ó²¿µÄ follow ¼¯¸³¸øµ±Ç°·ÇÖÕ½á·û
+                    // å½“å‰éç»ˆç»“ç¬¦ ï¼= å·¦éƒ¨æ—¶ï¼ŒåŠ å…¥æ–°çš„æ›´æ–°å¼ï¼šå½“å‰å·¦éƒ¨çš„ follow é›†èµ‹ç»™å½“å‰éç»ˆç»“ç¬¦
                     if (*iterP != *iter)
                         update[*iter].insert(*iterP);
-                    // µ±Ç°·ÇÖÕ½á·û²»ÄÜÍÆ³ö¿Õ£¬Ôò²»ÔÙ¼ÌĞø²úÉú¸üĞÂÊ½£¬·ñÔòĞèÒª¼ÌĞøÏòÇ°É¨Ãè
+                    // å½“å‰éç»ˆç»“ç¬¦ä¸èƒ½æ¨å‡ºç©ºï¼Œåˆ™ä¸å†ç»§ç»­äº§ç”Ÿæ›´æ–°å¼ï¼Œå¦åˆ™éœ€è¦ç»§ç»­å‘å‰æ‰«æ
                     SymbolSet tmpFirstSet;
                     firstOfOneSymbol(*iterP, tmpFirstSet);
                     if (tmpFirstSet.find("~") == tmpFirstSet.end())
@@ -145,99 +173,82 @@ void Grammar::buildFollow() {
             }
         }
     }
-    // ½« $ ·ûºÅ¸³¸øÆğÊ¼·ûºÅµÄ follow ¼¯
+    // å°† $ ç¬¦å·èµ‹ç»™èµ·å§‹ç¬¦å·çš„ follow é›†
     follow[S].insert("$");
-    // ¸ù¾İ¸üĞÂÊ½²»¶Ï¸üĞÂ follow ¼¯
+    // æ ¹æ®æ›´æ–°å¼ä¸æ–­æ›´æ–° follow é›†
     for (UpdateMap::iterator iter = update.begin(); iter != update.end(); iter++)
         recurUpdFollow(iter->first, update);
-    // follow ¼¯È¥¿Õ
-    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++) {
+    // follow é›†å»ç©º
+    for (SymbolSet::iterator iter = N.begin(); iter != N.end(); iter++)
+    {
         follow[*iter].erase("~");
     }
 }
 
-/// @brief ´Óa·ûºÅ¿ªÊ¼µİ¹é¸üĞÂ follow ¼¯
-void Grammar::recurUpdFollow(Symbol a, UpdateMap& update) {
+/// @brief ä»aç¬¦å·å¼€å§‹é€’å½’æ›´æ–° follow é›†
+void Grammar::recurUpdFollow(Symbol a, UpdateMap &update)
+{
     UpdateMap::iterator aLoc = update.find(a);
     if (aLoc == update.end())
         return;
-    for (SymbolSet::iterator iter = aLoc->second.begin(); iter != aLoc->second.end(); iter++) {
+    for (SymbolSet::iterator iter = aLoc->second.begin(); iter != aLoc->second.end(); iter++)
+    {
         follow[*iter].insert(follow[a].begin(), follow[a].end());
         recurUpdFollow(*iter, update);
     }
 }
 
-/// @brief ¹¹ÔìÔ¤²â·ÖÎö±í
-void Grammar::buildLL1AnaTable() {
-    // ±éÀúËùÓĞ²úÉúÊ½
-    for (SymbolSet::iterator iterLeft = N.begin(); iterLeft != N.end(); iterLeft++) {
+/// @brief æ„é€ é¢„æµ‹åˆ†æè¡¨
+void Grammar::buildLL1AnaTable()
+{
+    // éå†æ‰€æœ‰äº§ç”Ÿå¼
+    for (SymbolSet::iterator iterLeft = N.begin(); iterLeft != N.end(); iterLeft++)
+    {
         VectorRHS rhss = P[(*iterLeft)];
-        // ±éÀúÒ»¸ö·ÇÖÕ½á·ûµÄËùÓĞÓÒ²¿²úÉúÊ½
-        for (VectorRHS::iterator iterRhs = rhss.begin(); iterRhs != rhss.end(); iterRhs++) {
+        // éå†ä¸€ä¸ªéç»ˆç»“ç¬¦çš„æ‰€æœ‰å³éƒ¨äº§ç”Ÿå¼
+        for (VectorRHS::iterator iterRhs = rhss.begin(); iterRhs != rhss.end(); iterRhs++)
+        {
             RHS oneRHS = *iterRhs;
             SymbolSet tmpFirstSet;
             firstOfVecSymbol(oneRHS, tmpFirstSet);
-            // ¶ÔÃ¿¸öÖÕ½á·ûºÅ a¡ÊFIRST(ÓÒ²¿)£¬A->¦Á ·ÅÈë M[A,a]
-            for (SymbolSet::iterator a = tmpFirstSet.begin(); a != tmpFirstSet.end(); a++) {
+            // å¯¹æ¯ä¸ªç»ˆç»“ç¬¦å· aâˆˆFIRST(å³éƒ¨)ï¼ŒA->Î± æ”¾å…¥ M[A,a]
+            for (SymbolSet::iterator a = tmpFirstSet.begin(); a != tmpFirstSet.end(); a++)
+            {
                 if ((*a) != "~")
                     LL1AnaTable[*iterLeft][*a] = oneRHS;
-                else {
+                else
+                {
                     for (SymbolSet::iterator b = follow[*iterLeft].begin(); b != follow[*iterLeft].end(); b++)
                         LL1AnaTable[*iterLeft][*b] = oneRHS;
                 }
             }
         }
     }
-    // ¸øËùÓĞÎŞ¶¨ÒåµÄ M[A,a] ±êÉÏ´íÎó±êÊ¶
+    // ç»™æ‰€æœ‰æ— å®šä¹‰çš„ M[A,a] æ ‡ä¸Šé”™è¯¯æ ‡è¯†
     SymbolSet rowSet = T;
     rowSet.erase("~");
     rowSet.insert("$");
-    for (SymbolSet::iterator line = N.begin(); line != N.end(); line++) {
-        for (SymbolSet::iterator row = rowSet.begin(); row != rowSet.end(); row++) {
+    for (SymbolSet::iterator line = N.begin(); line != N.end(); line++)
+    {
+        for (SymbolSet::iterator row = rowSet.begin(); row != rowSet.end(); row++)
+        {
             if (LL1AnaTable[*line].find(*row) == LL1AnaTable[*line].end())
-                LL1AnaTable[*line].insert(std::pair<Symbol, RHS>(*row, { "ERR" }));
+                LL1AnaTable[*line].insert(std::pair<Symbol, RHS>(*row, {"ERR"}));
         }
     }
 }
 
-/// @brief Ïû³ıÖ±½Ó×óµİ¹é
-/// @return 1-´æÔÚ×óµİ¹éÇÒÏû³ı³É¹¦
-///         0-²»´æÔÚ×óµİ¹é
-int Grammar::removDirectRecur() {
-    return 0;
-}
-
-/// @brief ÌáÈ¡×ó¹«Òò×Ó
-/// @return 1-ÓĞ×ó¹«Òò×Ó²¢ÇÒÒÑĞŞ¸Ä³É¹¦
-///         0-²»´æÔÚ×ó¹«Òò×Ó
-int Grammar::extractFactor() {
-    return 0;
-}
-
-/// @brief ¸ÄĞ´ÎÄ·¨
-void Grammar::rewriteGrammar() {
-    std::cout << "----------------------------------------------------------" << std::endl;
-    std::cout << "Ïû³ıÖ±½Ó×óµİ¹é..." << std::endl;
-    if (removDirectRecur())
-        std::cout << "Ïû³ı³É¹¦" << std::endl;
-    else
-        std::cout << "µ±Ç°ÎÄ·¨ÎŞ×óµİ¹é" << std::endl;
-    std::cout << "ÌáÈ¡×ó¹«Òò×Ó..." << std::endl;
-    if (extractFactor())
-        std::cout << "ÌáÈ¡³É¹¦" << std::endl;
-    else
-        std::cout << "µ±Ç°ÎÄ·¨ÎŞ×ó¹«Òò×Ó" << std::endl;
-    std::cout << "µ±Ç°ÎÄ·¨£º" << std::endl;
-    output();
-}
-
-/// @brief Êä³ö first ¼¯ºÏºÍ follow ¼¯ºÏ
-void Grammar::outputFirstFollow() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "Êä³ö FIRST FOLLOW£º" << std::endl;
-    // Êä³ö±íÍ·
-    std::cout << "symbol\t" << setfill(' ') << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << "first\t" << "follow" << std::endl;
-    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+/// @brief è¾“å‡º first é›†åˆå’Œ follow é›†åˆ
+void Grammar::outputFirstFollow()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "è¾“å‡º FIRST FOLLOWï¼š" << std::endl;
+    // è¾“å‡ºè¡¨å¤´
+    std::cout << "symbol\t" << setfill(' ') << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << "first\t"
+              << "follow" << std::endl;
+    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
+    {
         std::string oLine = "";
         std::cout << *iterN << "\t";
         for (SymbolSet::iterator iterF = first[*iterN].begin(); iterF != first[*iterN].end(); iterF++)
@@ -250,12 +261,14 @@ void Grammar::outputFirstFollow() {
     }
 }
 
-/// @brief Êä³ö LL(1) ·ÖÎö±í
-void Grammar::outputAnaTable() {
-    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "Êä³ö LL(1) ·ÖÎö±í£º" << std::endl;
+/// @brief è¾“å‡º LL(1) åˆ†æè¡¨
+void Grammar::outputLL1AnaTable()
+{
+    std::cout << std::endl
+              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "è¾“å‡º LL(1) åˆ†æè¡¨ï¼š" << std::endl;
 
-    // Êä³ö±íÍ·
+    // è¾“å‡ºè¡¨å¤´
     SymbolSet rowSet = T;
     rowSet.erase("~");
     rowSet.insert("$");
@@ -264,14 +277,17 @@ void Grammar::outputAnaTable() {
         std::cout << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << *iterS;
     std::cout << std::endl;
 
-    // Êä³ö·ÖÎö±íÄÚÈİ
-    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+    // è¾“å‡ºåˆ†æè¡¨å†…å®¹
+    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
+    {
         std::cout << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << *iterN;
         std::string oLine = "";
-        for (SymbolSet::iterator iterT = rowSet.begin(); iterT != rowSet.end(); iterT++) {
+        for (SymbolSet::iterator iterT = rowSet.begin(); iterT != rowSet.end(); iterT++)
+        {
             oLine = "";
             RHS curRHS = LL1AnaTable[*iterN][*iterT];
-            if (curRHS != ERR) {
+            if (curRHS != ERR)
+            {
                 oLine = oLine + *iterN + " -> ";
                 for (RHS::iterator iterRHS = curRHS.begin(); iterRHS != curRHS.end(); iterRHS++)
                     oLine = oLine + *iterRHS + " ";
