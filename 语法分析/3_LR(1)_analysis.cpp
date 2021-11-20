@@ -1,18 +1,70 @@
 #include "Grammar.h"
 #include <iostream>
+#include <string>
 
 /// @brief LR(1) 分析程序
 void Grammar::LR1Analysis() {
     extensionGrammar();
+    //outputExtentionG();
     buildProjCluster();
     outputProjCluster();
     outputLR1AnaTable();
 
     std::cout << "----------------------------------------------------------" << std::endl;
-    std::cout << "请输入要分析的字符串：";
+    std::cout << "请输入要分析的字符串，符号之间使用空格分隔：";
     inputS();
 
-
+    std::vector<int> stateStack;
+    VecSymbol symbolStack;
+    stateStack.push_back(0);
+    symbolStack.push_back("-");
+    forwardPointer();
+    int stateS = 0;
+    do {
+        stateS = stateStack.back();
+        // 错误状态
+        if (LR1AnaTable[stateS].find(ch) == LR1AnaTable[stateS].end())
+            error(0);
+        // 分析表中有相应的动作或 goto 目标
+        else {
+            std::string action = LR1AnaTable[stateS][ch];
+            // 移进动作
+            if (action[0] == 'S') {
+                // 将当前符号压入符号栈
+                symbolStack.push_back(ch);
+                // 将转移后的状态压入状态栈
+                stateStack.push_back(std::stoi(action.substr(1)));
+                // 前移指针
+                forwardPointer();
+            }
+            // 归约动作
+            else if (action[0] == 'R') {
+                // 获取归约所使用的产生式 A -> β
+                int prodN = std::stoi(action.substr(1));
+                ProdSplit p = extensionP[prodN];
+                // 从符号栈顶和状态栈顶弹出 |β| 个符号
+                int lenBeta = p.second.size();
+                for (int i = 0; i < lenBeta; i++) {
+                    stateStack.pop_back();
+                    symbolStack.pop_back();
+                }
+                // 将 A 压入符号栈
+                symbolStack.push_back(p.first);
+                // 把经过 A 到达的状态压入状态栈
+                int curS = stateStack.back();
+                stateStack.push_back(std::stoi(LR1AnaTable[curS][p.first]));
+                // 输出产生式 A -> β
+                std::cout << p.first << " -> ";
+                for (RHS::iterator iterRHS = p.second.begin(); iterRHS != p.second.end(); iterRHS++)
+                    std::cout << *iterRHS << " ";
+                std::cout << std::endl;
+            }
+            // 接受动作
+            else if (action == "ACC")
+                break;
+        }
+    } while (1);
+    std::cout << "识别成功！";
 }
 
 /// @brief 输出项目集规范族
