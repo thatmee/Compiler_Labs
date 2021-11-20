@@ -50,6 +50,8 @@ private:
     SymbolTable LL1AnaTable;
 
     ProdCnt extensionP;
+    ActGotoTable LR1AnaTable;
+    ProjectCluster C;
 
     static const int ERR_MISSING_R_BRACKET = 1; // 错误状态代码
     static const int ERR_MISSING_OBJECT = 2;    // 错误状态代码
@@ -79,6 +81,7 @@ private:
     void extensionGrammar();
     void buildProjCluster();
     void buildLR1AnaTable();
+    void outputProjCluster();
 
 
 public:

@@ -1,28 +1,46 @@
 #include "Grammar.h"
+#include <iostream>
 
 /// @brief LR(1) 分析程序
 void Grammar::LR1Analysis() {
 
     extensionGrammar();
-    ProdSplit a = ProdSplit("S'", { ".", "E" });
-    ProjectMap test;
-    test[a].insert("$");
-    ProjectMap result;
-    closure(test, result);
-
     buildProjCluster();
+    outputProjCluster();
     buildLR1AnaTable();
 
+}
+
+/// @brief 输出项目集规范族
+void Grammar::outputProjCluster() {
+    // 遍历所有项目集
+    for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++) {
+        ProjectMap curProjectSet = iterPM->second;
+        std::cout << "I" << std::to_string(iterPM->first) << ":" << std::endl;
+        // 遍历一个项目集的所有项目
+        for (ProjectMap::iterator iterP = curProjectSet.begin(); iterP != curProjectSet.end(); iterP++) {
+            ProdSplit curProd = iterP->first;
+            SymbolSet curLookAhead = iterP->second;
+            std::cout << curProd.first << " -> ";
+            for (RHS::iterator iterS = curProd.second.begin(); iterS != curProd.second.end(); iterS++)
+                std::cout << *iterS << " ";
+            std::cout << "\t";
+            for (SymbolSet::iterator iterS = curLookAhead.begin(); iterS != curLookAhead.end(); iterS++)
+                std::cout << *iterS << " ";
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 /// @brief 构造项目集 I 的闭包，放在 resultI 中
 /// @param I 输入项目集
 /// @param resultI 结果项目集
 void Grammar::closure(ProjectMap& I, ProjectMap& J) {
-    J = ProjectMap(I.begin(), I.end());
+    J = I;
     ProjectMap JNew;
     do {
-        JNew = ProjectMap(J.begin(), J.end());
+        JNew = J;
         // 遍历 JNew 中的每一个项目
         for (ProjectMap::iterator iterP = JNew.begin(); iterP != JNew.end(); iterP++) {
             ProdSplit curProd = iterP->first;
@@ -57,7 +75,29 @@ void Grammar::closure(ProjectMap& I, ProjectMap& J) {
 
 /// @brief 转移函数 go，resultI = go[I, X]
 void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI) {
-
+    ProjectMap J;
+    // 遍历每一个项目
+    for (ProjectMap::iterator iterP = I.begin(); iterP != I.end(); iterP++) {
+        ProdSplit curProd = iterP->first;
+        RHS curProdRHS = curProd.second;
+        // 归约项目没有后继
+        if (curProdRHS.back() == ".")
+            continue;
+        RHS::iterator pointLoc = find(curProdRHS.begin(), curProdRHS.end(), ".");
+        // 找到了 .
+        if (pointLoc != curProdRHS.end()) {
+            RHS::iterator nextLoc = pointLoc + 1;
+            if (*nextLoc == X) {
+                // 将 . 向右移动一位
+                curProdRHS.erase(pointLoc);
+                RHS::iterator XLoc = find(curProdRHS.begin(), curProdRHS.end(), X);
+                curProdRHS.insert(XLoc + 1, ".");
+                ProdSplit tmpProd = ProdSplit(curProd.first, curProdRHS);
+                J.insert(Project(tmpProd, iterP->second));
+            }
+        }
+    }
+    closure(J, resultI);
 }
 
 /// @brief 拓广文法并对拓广后的文法产生式进行编号
@@ -76,9 +116,81 @@ void Grammar::extensionGrammar() {
     S = "S'";
 }
 
-/// @brief 构造 LR(1) 项目集规范簇
+/// @brief 构造 LR(1) 项目集规范族
 void Grammar::buildProjCluster() {
+    ProjectMap I0;
+    ProjectMap st;
+    ProdSplit start = extensionP[0];
+    start.second.insert(start.second.begin(), ".");
+    st[start].insert("$");
+    closure(st, I0);
+    C[0] = I0;
 
+    int cnt = 1;
+    ProjectCluster CNew;
+    do {
+        CNew = C;
+        // 遍历每一个项目集
+        for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++) {
+            // 遍历终结符
+            for (SymbolSet::iterator iterT = T.begin(); iterT != T.end(); iterT++) {
+                ProjectMap tmpPM;
+                go(iterPM->second, *iterT, tmpPM);
+                if (tmpPM.size() != 0) {
+                    // 查看 C中有没有这个项目集
+                    int isExist = 0;
+                    ProjectCluster::iterator iterPos;
+                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++) {
+                        if (tmpPM == iterPos->second) {
+                            isExist = 1;
+                            break;
+                        }
+                    }
+                    // 如果 go[I,X] 不在 C 中
+                    if (!isExist) {
+                        // 将新的项目集插入到 C
+                        C.insert(std::pair<int, ProjectMap>(cnt, tmpPM));
+                        // 更新 action 表
+                        LR1AnaTable[iterPM->first][*iterT] = "S" + std::to_string(cnt);
+                        cnt++;
+                    }
+                    // 如果 go[I,X] 在 C 中，更新 action 表
+                    if (isExist) {
+                        LR1AnaTable[iterPM->first][*iterT] = "S" + std::to_string(iterPos->first);
+                    }
+                }
+            }
+            //遍历非终结符
+            for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+                ProjectMap tmpPM;
+                go(iterPM->second, *iterN, tmpPM);
+                if (tmpPM.size() != 0) {
+                    // 查看 C中有没有这个项目集
+                    int isExist = 0;
+                    ProjectCluster::iterator iterPos;
+                    for (iterPos = C.begin(); iterPos != C.end(); iterPos++) {
+                        if (tmpPM == iterPos->second) {
+                            isExist = 1;
+                            break;
+                        }
+                    }
+                    // 如果 go[I,X] 不为空，且不在 C 中
+                    if (!isExist) {
+                        // 将新的项目集插入到 C
+                        C.insert(std::pair<int, ProjectMap>(cnt, tmpPM));
+                        // 更新 goto 表
+                        LR1AnaTable[iterPM->first][*iterN] = std::to_string(cnt);
+                        cnt++;
+                    }
+
+                    // 如果 go[I,X] 在 C 中，更新 goto 表
+                    if (isExist) {
+                        LR1AnaTable[iterPM->first][*iterN] = std::to_string(iterPos->first);
+                    }
+                }
+            }
+        }
+    } while (CNew.size() != C.size());
 }
 
 /// @brief 构造 LR(1) 分析表
