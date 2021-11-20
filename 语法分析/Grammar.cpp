@@ -151,7 +151,10 @@ void Grammar::input() {
 /// @brief 读取要分析的字符串
 void Grammar::inputS() {
     std::string str;
+    char ch = getchar();
     std::getline(cin, str);
+    if (ch != '\n')
+        str.insert(str.begin(), ch);
     int i = 0, len = static_cast<int>(str.size());
     boost::split(s, str, boost::is_any_of(" "));
     // 清除 split 函数可能产生的空串

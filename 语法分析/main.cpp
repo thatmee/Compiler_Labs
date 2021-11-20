@@ -29,8 +29,6 @@ int main(void)
     case 2:
         splitLine();
         g.input();
-        splitLine();
-        g.output();
         g.LL1Analysis();
         break;
     case 3:
@@ -45,5 +43,5 @@ int main(void)
 }
 
 void splitLine() {
-    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
 }

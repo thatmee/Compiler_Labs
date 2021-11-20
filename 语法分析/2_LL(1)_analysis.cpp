@@ -1,6 +1,8 @@
 #include "Grammar.h"
 #include <iostream>
 
+const int FIRST_O_WIDTH = 20;
+const int TABLE_O_WIDTH = 20;
 
 /// @brief LL(1) 分析程序
 void Grammar::LL1Analysis() {
@@ -8,11 +10,10 @@ void Grammar::LL1Analysis() {
     buildFirst();
     buildFollow();
     buildLL1AnaTable();
-    // outputFirst();
-    // outputFollow();
-    // outputAnaTable();
+    outputFirstFollow();
+    outputAnaTable();
 
-    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "请输入要分析的字符串：";
     inputS();
     VecSymbol symbolStack;
@@ -228,4 +229,55 @@ void Grammar::rewriteGrammar() {
         std::cout << "当前文法无左公因子" << std::endl;
     std::cout << "当前文法：" << std::endl;
     output();
+}
+
+/// @brief 输出 first 集合和 follow 集合
+void Grammar::outputFirstFollow() {
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "输出 FIRST FOLLOW：" << std::endl;
+    // 输出表头
+    std::cout << "symbol\t" << setfill(' ') << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << "first\t" << "follow" << std::endl;
+    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+        std::string oLine = "";
+        std::cout << *iterN << "\t";
+        for (SymbolSet::iterator iterF = first[*iterN].begin(); iterF != first[*iterN].end(); iterF++)
+            oLine = oLine + *iterF + " ";
+        std::cout << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << oLine;
+        oLine = "";
+        for (SymbolSet::iterator iterF = follow[*iterN].begin(); iterF != follow[*iterN].end(); iterF++)
+            oLine = oLine + *iterF + " ";
+        std::cout << setw(FIRST_O_WIDTH) << setiosflags(ios::left) << oLine << std::endl;
+    }
+}
+
+/// @brief 输出 LL(1) 分析表
+void Grammar::outputAnaTable() {
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "输出 LL(1) 分析表：" << std::endl;
+
+    // 输出表头
+    SymbolSet rowSet = T;
+    rowSet.erase("~");
+    rowSet.insert("$");
+    std::cout << setfill(' ') << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << "N";
+    for (SymbolSet::iterator iterS = rowSet.begin(); iterS != rowSet.end(); iterS++)
+        std::cout << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << *iterS;
+    std::cout << std::endl;
+
+    // 输出分析表内容
+    for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++) {
+        std::cout << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << *iterN;
+        std::string oLine = "";
+        for (SymbolSet::iterator iterT = rowSet.begin(); iterT != rowSet.end(); iterT++) {
+            oLine = "";
+            RHS curRHS = LL1AnaTable[*iterN][*iterT];
+            if (curRHS != ERR) {
+                oLine = oLine + *iterN + " -> ";
+                for (RHS::iterator iterRHS = curRHS.begin(); iterRHS != curRHS.end(); iterRHS++)
+                    oLine = oLine + *iterRHS + " ";
+            }
+            std::cout << setw(TABLE_O_WIDTH) << setiosflags(ios::left) << oLine;
+        }
+        std::cout << std::endl;
+    }
 }

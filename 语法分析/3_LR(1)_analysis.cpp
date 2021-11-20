@@ -1,18 +1,18 @@
 #include "Grammar.h"
-#include <iostream>
-#include <string>
 
 /// @brief LR(1) 分析程序
 void Grammar::LR1Analysis() {
     extensionGrammar();
-    //outputExtentionG();
+    outputExtentionG();
     buildProjCluster();
     outputProjCluster();
     outputLR1AnaTable();
 
-    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "请输入要分析的字符串，符号之间使用空格分隔：";
     inputS();
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "分析过程如下：" << std::endl;
 
     std::vector<int> stateStack;
     VecSymbol symbolStack;
@@ -67,8 +67,22 @@ void Grammar::LR1Analysis() {
     std::cout << "识别成功！";
 }
 
+/// @brief 输出拓广后的文法
+void Grammar::outputExtentionG() {
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "拓广后的文法为：" << std::endl;
+    for (int i = 0; i < extensionP.size(); i++) {
+        std::cout << "(" << i << ")  " << extensionP[i].first << " -> ";
+        for (RHS::iterator iterRHS = extensionP[i].second.begin(); iterRHS != extensionP[i].second.end(); iterRHS++)
+            std::cout << *iterRHS << " ";
+        std::cout << std::endl;
+    }
+}
+
 /// @brief 输出项目集规范族
 void Grammar::outputProjCluster() {
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "项目集规范族为：" << std::endl;
     // 遍历所有项目集
     for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++) {
         ProjectMap curProjectSet = iterPM->second;
@@ -270,13 +284,10 @@ void Grammar::buildProjCluster() {
     } while (CNew.size() != C.size());
 }
 
-/// @brief 构造 LR(1) 分析表
-void Grammar::buildLR1AnaTable() {
-
-}
-
 /// @brief 输出 LR(1) 分析表
 void Grammar::outputLR1AnaTable() {
+    std::cout << std::endl << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+    std::cout << "LR(1) 分析表为：" << std::endl;
     // 输出表头
     std::cout << "state\t";
     for (SymbolSet::iterator iterS = T.begin(); iterS != T.end(); iterS++)
@@ -305,10 +316,12 @@ void Grammar::outputLR1AnaTable() {
         std::cout << "\t";
         // 对非终结符输出 goto
         for (SymbolSet::iterator iterS = N.begin(); iterS != N.end(); iterS++) {
-            std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
-            if (loc != LR1AnaTable[i].end())
-                std::cout << loc->second;
-            std::cout << "\t";
+            if (*iterS != "S'") {
+                std::unordered_map<Symbol, std::string>::iterator loc = LR1AnaTable[i].find(*iterS);
+                if (loc != LR1AnaTable[i].end())
+                    std::cout << loc->second;
+                std::cout << "\t";
+            }
         }
         std::cout << std::endl;
     }

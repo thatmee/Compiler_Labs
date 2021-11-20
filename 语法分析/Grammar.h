@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <set>
 #include <map>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -53,9 +55,7 @@ private:
     ActGotoTable LR1AnaTable;
     ProjectCluster C;
 
-    static const int ERR_MISSING_R_BRACKET = 1; // 错误状态代码
-    static const int ERR_MISSING_OBJECT = 2;    // 错误状态代码
-    const RHS ERR = { "ERR" };
+
 
 
     void inputS();
@@ -75,18 +75,25 @@ private:
     void buildFollow();
     void recurUpdFollow(Symbol, UpdateMap&);
     void buildLL1AnaTable(); // 构造预测分析表
+    void outputFirstFollow();
+    void outputAnaTable();
 
     void closure(ProjectMap&, ProjectMap&);
     void go(ProjectMap, Symbol, ProjectMap&, int);
     void extensionGrammar();
     int getProductCnt(ProdSplit&);
     void buildProjCluster();
-    void buildLR1AnaTable();
     void outputProjCluster();
     void outputLR1AnaTable();
+    void outputExtentionG();
 
 
 public:
+    static const int ERR_MISSING_R_BRACKET = 1; // 错误状态代码
+    static const int ERR_MISSING_OBJECT = 2;    // 错误状态代码
+    const RHS ERR = { "ERR" };
+    static const int SPLIT_LINE_WIDTH = 60;
+
     Grammar();
     //Grammar(SymbolSet _N, SymbolSet _T, Productions _P, std::string _S) : N(_N), T(_T), P(_P), S(_S) {};
     ~Grammar() {}
