@@ -24,14 +24,14 @@ void Grammar::recursiveAnalysis()
     std::cout << std::endl
         << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "消除左递归后的文法：" << std::endl;
-    std::cout << "E->TE'" << std::endl;
-    std::cout << "E'->+TE'|-TE'|~" << std::endl;
-    std::cout << "T->FT'" << std::endl;
-    std::cout << "T'->*FT'|/FT'|~" << std::endl;
-    std::cout << "F->(E)|num" << std::endl;
+    std::cout << "E -> T E'" << std::endl;
+    std::cout << "E' -> + T E' | - T E' | ~" << std::endl;
+    std::cout << "T -> F T'" << std::endl;
+    std::cout << "T' -> * F T' | / F T' | ~" << std::endl;
+    std::cout << "F -> ( E ) | num" << std::endl;
     std::cout << std::endl
         << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "请输入要分析的字符串：";
+    std::cout << "请输入要分析的字符串，符号之间使用空格分隔：";
     inputS();
     std::cout << std::endl
         << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
@@ -52,25 +52,6 @@ void Grammar::forwardPointer()
         ch = "\0";
 }
 
-/// @brief 错误处理函数
-/// @param errState 传入错误状态码
-void Grammar::error(int errState)
-{
-    switch (errState)
-    {
-    case Grammar::ERR_MISSING_R_BRACKET:
-        std::cout << "错误：括号不匹配" << std::endl;
-        break;
-    case Grammar::ERR_MISSING_OBJECT:
-        std::cout << "错误：缺少运算对象" << std::endl;
-        break;
-    default:
-        std::cout << "错误" << std::endl;
-        break;
-    }
-    exit(0);
-}
-
 /// @brief 非终结符 E 的处理程序
 void Grammar::procE()
 {
@@ -83,6 +64,10 @@ void Grammar::procE()
         forwardPointer();
         procE();
     }
+    else if (ch == "$" || ch == ")")
+        return;
+    else
+        error(Grammar::ERR_MISSING_OPERATOR);
 }
 
 /// @brief 非终结符 T 的处理程序

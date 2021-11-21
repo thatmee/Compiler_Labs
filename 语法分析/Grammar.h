@@ -58,18 +58,18 @@ private:
     void procF();                                            // 非终结符 F 的处理程序
     void procT();                                            // 非终结符 T 的处理程序
     void buildFirst();                                       // 构造 first
-    void firstOfOneSymbol(Symbol, SymbolSet &);              // 找某一个符号的 first 集合
-    void firstOfVecSymbol(std::vector<Symbol>, SymbolSet &); // 找一连串符号的 first 集合
+    void firstOfOneSymbol(Symbol, SymbolSet&);              // 找某一个符号的 first 集合
+    void firstOfVecSymbol(std::vector<Symbol>, SymbolSet&); // 找一连串符号的 first 集合
     void buildFollow();                                      // 构建 follow
-    void recurUpdFollow(Symbol, UpdateMap &);                // 根据更新式递归更新 follow
+    void recurUpdFollow(Symbol, UpdateMap&);                // 根据更新式递归更新 follow
     void outputFirstFollow();                                // 输出 first 和 follow
     void buildLL1AnaTable();                                 // 构造预测分析表
     void outputLL1AnaTable();                                // 输出 LL1 分析表
     void extensionGrammar();                                 // 拓广文法并编号
-    int getProductCnt(ProdSplit &);                          // 得到产生式的编号
+    int getProductCnt(ProdSplit&);                          // 得到产生式的编号
     void outputExtentionG();                                 // 输出拓广后的文法
-    void closure(ProjectMap &, ProjectMap &);                // 构造项目集 I 的闭包，放在 resultI 中
-    void go(ProjectMap, Symbol, ProjectMap &, int);          // 转移函数 go
+    void closure(ProjectMap&, ProjectMap&);                // 构造项目集 I 的闭包，放在 resultI 中
+    void go(ProjectMap, Symbol, ProjectMap&, int);          // 转移函数 go
     void buildProjCluster();                                 // 构造项目集规范族
     void outputProjCluster();                                // 输出项目集规范族
     void outputLR1AnaTable();                                // 输出 LR1 分析表
@@ -77,7 +77,8 @@ private:
 public:
     static const int ERR_MISSING_R_BRACKET = 1; // 错误状态代码
     static const int ERR_MISSING_OBJECT = 2;    // 错误状态代码
-    const RHS ERR = {"ERR"};                    // 错误状态
+    static const int ERR_MISSING_OPERATOR = 3;    // 错误状态代码
+    const RHS ERR = { "ERR" };                    // 错误状态
     static const int SPLIT_LINE_WIDTH = 60;     // 用于格式化输出
 
     Grammar();

@@ -79,7 +79,7 @@ void Grammar::LR1Analysis()
                 break;
         }
     } while (1);
-    std::cout << "识别成功！";
+    std::cout << "识别成功！" << std::endl;
 }
 
 /// @brief 获取产生式的序号

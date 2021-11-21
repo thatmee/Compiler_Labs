@@ -22,7 +22,7 @@ void Grammar::LL1Analysis()
 
     std::cout << std::endl
         << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
-    std::cout << "请输入要分析的字符串：";
+    std::cout << "请输入要分析的字符串，符号之间使用空格分隔：";
     inputS();
     VecSymbol symbolStack;
     symbolStack.push_back("$");
