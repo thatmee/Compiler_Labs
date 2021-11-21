@@ -54,6 +54,16 @@ void Grammar::error(int errState)
     exit(0);
 }
 
+/// @brief 指针前移，并更新 ch 中的值
+void Grammar::forwardPointer()
+{
+    pointer++;
+    if (pointer < s.size())
+        ch = s[pointer];
+    else
+        ch = "\0";
+}
+
 /// @brief 输出文法
 void Grammar::output() const
 {

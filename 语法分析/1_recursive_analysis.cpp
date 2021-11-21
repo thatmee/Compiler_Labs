@@ -42,16 +42,6 @@ void Grammar::recursiveAnalysis()
     std::cout << "归约出 E，识别成功！" << std::endl;
 }
 
-/// @brief 指针前移，并更新 ch 中的值
-void Grammar::forwardPointer()
-{
-    pointer++;
-    if (pointer < s.size())
-        ch = s[pointer];
-    else
-        ch = "\0";
-}
-
 /// @brief 非终结符 E 的处理程序
 void Grammar::procE()
 {
