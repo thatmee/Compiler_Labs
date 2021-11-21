@@ -22,12 +22,46 @@ using namespace std;
 ///       F->(E)|n
 Grammar::Grammar()
 {
-    this->N = {"E", "T", "F"};
-    this->T = {"+", "-", "*", "/", "(", ")", "num"};
+    this->N = { "E", "T", "F" };
+    this->T = { "+", "-", "*", "/", "(", ")", "num" };
     this->S = "E";
-    this->P["E"] = {{"E", "+", "T"}, {"E", "-", "T"}, {"T"}};
-    this->P["T"] = {{"T", "*", "F"}, {"T", "/", "F"}, {"F"}};
-    this->P["F"] = {{"(", "E", ")"}, {"num"}};
+    this->P["E"] = { {"E", "+", "T"}, {"E", "-", "T"}, {"T"} };
+    this->P["T"] = { {"T", "*", "F"}, {"T", "/", "F"}, {"F"} };
+    this->P["F"] = { {"(", "E", ")"}, {"num"} };
+}
+
+/// @brief 错误处理函数
+/// @param errState 传入错误状态码，0 代表未知错误
+void Grammar::error(int errState)
+{
+    switch (errState)
+    {
+    case Grammar::ERR_MISSING_R_BRACKET:
+        std::cout << "错误：括号不匹配" << std::endl;
+        break;
+    case Grammar::ERR_MISSING_OBJECT:
+        std::cout << "错误：缺少运算对象" << std::endl;
+        break;
+    case Grammar::ERR_MISSING_OPERATOR:
+        std::cout << "错误：缺少运算符号" << std::endl;
+        break;
+    default:
+        std::cout << "未知错误" << std::endl;
+        break;
+    }
+    std::cout << std::endl << std::endl;
+    system("pause");
+    exit(0);
+}
+
+/// @brief 指针前移，并更新 ch 中的值
+void Grammar::forwardPointer()
+{
+    pointer++;
+    if (pointer < s.size())
+        ch = s[pointer];
+    else
+        ch = "\0";
 }
 
 /// @brief 输出文法
@@ -35,24 +69,20 @@ void Grammar::output() const
 {
     for (auto iter1 = this->P.begin(); iter1 != this->P.end(); iter1++)
     {
-        std::cout << iter1->first << "->"; // 输出每一条产生式的左部和推导符号，如：E->
+        std::cout << iter1->first << " -> "; // 输出每一条产生式的左部和推导符号，如：E ->
         VectorRHS tmp = iter1->second;
         int len = static_cast<int>(tmp.size()), j = 0;
-        // 输出每一条产生式的所有右部产生式，如：E+T|E-T|T
+        // 输出每一条产生式的所有右部产生式，如：E + T | E - T | T
         for (j = 0; j < len - 1; j++)
         {
+            // 输出一个右部产生式，如：E + T
             for (int k = 0; k < tmp[j].size(); k++)
-            {
-                // 输出一个右部产生式，如：E+T
-                std::cout << tmp[j][k];
-            }
-            std::cout << "|";
+                std::cout << tmp[j][k] << " ";
+            std::cout << " | ";
         }
+        // 输出最末尾的一个右部产生式
         for (int k = 0; k < tmp[j].size(); k++)
-        {
-            // 输出最末尾的一个右部产生式
-            std::cout << tmp[j][k];
-        }
+            std::cout << tmp[j][k] << " ";
         std::cout << endl;
     }
 }
@@ -70,7 +100,7 @@ void Grammar::input()
 
     // 读入非终结符集合
     std::cout << "请输入非终结符集合，以空格分隔：";
-    char ch = getchar();
+    ch = getchar();
     std::getline(cin, inputLine);
     std::vector<Symbol> symbolVec;
     boost::split(symbolVec, inputLine, boost::is_any_of(" "));

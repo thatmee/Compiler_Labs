@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file 3_LR(1)_analysis.cpp
  * @author NanYafeng
  * @brief LR(1) 分析程序相关的函数实现
@@ -7,7 +7,7 @@
  */
 #include "Grammar.h"
 
-/// @brief LR(1) 分析程序
+ /// @brief LR(1) 分析程序
 void Grammar::LR1Analysis()
 {
     extensionGrammar();
@@ -17,11 +17,11 @@ void Grammar::LR1Analysis()
     outputLR1AnaTable();
 
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "请输入要分析的字符串，符号之间使用空格分隔：";
     inputS();
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "分析过程如下：" << std::endl;
 
     std::vector<int> stateStack;
@@ -79,11 +79,11 @@ void Grammar::LR1Analysis()
                 break;
         }
     } while (1);
-    std::cout << "识别成功！";
+    std::cout << "识别成功！" << std::endl;
 }
 
 /// @brief 获取产生式的序号
-int Grammar::getProductCnt(ProdSplit &p)
+int Grammar::getProductCnt(ProdSplit& p)
 {
     for (ProdCnt::iterator iterPC = extensionP.begin(); iterPC != extensionP.end(); iterPC++)
     {
@@ -97,7 +97,7 @@ int Grammar::getProductCnt(ProdSplit &p)
 void Grammar::extensionGrammar()
 {
     // 将 P 内数据转换为单独的产生式存储到 extensionP 并编号
-    extensionP[0] = ProdSplit("S'", {{S}});
+    extensionP[0] = ProdSplit("S'", { {S} });
     int number = 1; // 编号 0 为拓广后的新起始符 S'
     for (SymbolSet::iterator iterN = N.begin(); iterN != N.end(); iterN++)
     {
@@ -106,14 +106,14 @@ void Grammar::extensionGrammar()
     }
     // 加入新的起始符 S'，修改相关的一些变量
     N.insert("S'");
-    P["S'"] = {{S}};
+    P["S'"] = { {S} };
     S = "S'";
 }
 
 /// @brief 构造项目集 I 的闭包，放在 resultI 中
 /// @param I 输入项目集
 /// @param resultI 结果项目集
-void Grammar::closure(ProjectMap &I, ProjectMap &J)
+void Grammar::closure(ProjectMap& I, ProjectMap& J)
 {
     J = I;
     ProjectMap JNew;
@@ -158,7 +158,7 @@ void Grammar::closure(ProjectMap &I, ProjectMap &J)
 
 /// @brief 转移函数 go，resultI = go[I, X]
 /// @param Inumber 代表项目集 I 的序号，用于构造分析表
-void Grammar::go(ProjectMap I, Symbol X, ProjectMap &resultI, int Inumber)
+void Grammar::go(ProjectMap I, Symbol X, ProjectMap& resultI, int Inumber)
 {
     ProjectMap J;
     // 遍历每一个项目
@@ -298,7 +298,7 @@ void Grammar::buildProjCluster()
 void Grammar::outputLR1AnaTable()
 {
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "LR(1) 分析表为：" << std::endl;
     // 输出表头
     std::cout << "state\t";
@@ -348,7 +348,7 @@ void Grammar::outputLR1AnaTable()
 void Grammar::outputExtentionG()
 {
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "拓广后的文法为：" << std::endl;
     for (int i = 0; i < extensionP.size(); i++)
     {
@@ -363,7 +363,7 @@ void Grammar::outputExtentionG()
 void Grammar::outputProjCluster()
 {
     std::cout << std::endl
-              << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
+        << setfill('-') << setw(Grammar::SPLIT_LINE_WIDTH) << "" << std::endl;
     std::cout << "项目集规范族为：" << std::endl;
     // 遍历所有项目集
     for (ProjectCluster::iterator iterPM = C.begin(); iterPM != C.end(); iterPM++)
